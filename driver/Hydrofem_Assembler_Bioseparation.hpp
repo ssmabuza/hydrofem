@@ -61,6 +61,10 @@ private:
     
   // problem defining the Bioseparation equation and parameters
   std::shared_ptr<Problem> m_problem;
+  // limiter 
+  std::shared_ptr<AFC_Limiter> m_limiter;
+  // storage for limiter
+  std::shared_ptr<FEVector> m_nodal_limiter;
   // mesh from dof manager
   std::shared_ptr<Mesh> m_mesh;
   // the dof manager

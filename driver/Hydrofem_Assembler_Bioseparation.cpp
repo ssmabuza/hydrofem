@@ -24,58 +24,33 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
                          const double delta_t,
                          const double beta) const
 {
-  
-  TEUCHOS_ASSERT(U->getMap()->isCompatible(* res->getMap()))
-  
-  // get the suitable vectors for bulk fluid and wall calculations
-  
-  TransformWallToChannel::split(m_u_f,m_u_w,U,m_bc_data->m_info_points);
-//  TransformWallToChannel::extend(m_u_w,m_u_w_extended,m_bc_data->m_info_points);
-//  TransformWallToChannel::restrict(m_u_f,m_u_f_restricted,m_bc_data->m_info_points);
-  
-  // compute the limiters
-  
-  m_limiter_f->buildLimiter(m_nodal_limiter_f,m_u_f);
-  m_limiter_w->buildLimiter(m_nodal_limiter_w,m_u_w);
-//  TransformWallToChannel::extend(m_nodal_limiter_w,m_nodal_limiter_w_extended,m_bc_data->m_info_points);
-
-  // get the channel mesh
-  const auto mesh_f = m_dofmapper_f->mesh();
-  // get the wall mesh
-  const auto mesh_w = m_dofmapper_w->mesh();
-  
+  // compute the limiter from the solution values  
+  m_limiter->buildLimiter(m_nodal_limiter,U);
+  // get the mesh
+  const auto mesh = m_dofmapper->mesh();
   // set all the values in the residual to zero
-  res->putScalar(0.0);
+  res_U->setZero();
   // set all the values in the Jacobian to zero
-  jac->setAllToScalar(0.0);
-  
-  // get the views of the distributed vectors
-  const auto& res_view = res->getDataNonConst();
-  const auto& U_view = U->getData();
-  const auto& U_dot_view = U_dot->getData();
-  const auto& nodal_lim_f_view = m_nodal_limiter_f->getData();
-  const auto& nodal_lim_w_view = m_nodal_limiter_w->getData();
-//  const auto& nodal_lim_f_restricted_view = m_nodal_limiter_f_restricted->getData();
-//  const auto& nodal_lim_w_extended_view = m_nodal_limiter_w_extended->getData();
+  jac_U->setZero();
 
   // pre-allocate some local matrices
-  auto mat_Mf  = createKArray<LMAT_<double>>(m_dofmapper_f->local_ndof(),m_dofmapper_f->local_ndof());
-  auto mat_Mlf = createKArray<LMAT_<double>>(m_dofmapper_f->local_ndof(),m_dofmapper_f->local_ndof());
-  auto mat_K   = createKArray<LMAT_<double>>(m_dofmapper_f->local_ndof(),m_dofmapper_f->local_ndof());
-  auto mat_D   = createKArray<LMAT_<double>>(m_dofmapper_f->local_ndof(),m_dofmapper_f->local_ndof());
-  auto mat_S   = createKArray<LMAT_<double>>(m_dofmapper_f->local_ndof(),m_dofmapper_f->local_ndof());
+  auto mat_M  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
+  auto mat_Ml = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
+  auto mat_K  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
+  auto mat_D  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
+  auto mat_S  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
 
   auto mat_sigma = createKArray<LMAT_<double>>(4,4);
   
-  auto U_loc     = createKArray<LVEC_<double>>(m_dofmapper_f->local_ndof());
-  auto U_dot_loc = createKArray<LVEC_<double>>(m_dofmapper_f->local_ndof());
-  auto res_loc_f = createKArray<LVEC_<double>>(m_dofmapper_f->local_ndof());
+  auto U_loc = createKArray<LVEC_<double>>(m_dofmapper->local_ndof());
+  auto U_dot_loc = createKArray<LVEC_<double>>(m_dofmapper->local_ndof());
+  auto res_loc = createKArray<LVEC_<double>>(m_dofmapper->local_ndof());
 
-  // element limiters for fluid and wall
-  double alpha_f (0.0), alpha_w(0.0);
+  // element limiters 
+  double alpha_f (0.0);
 
   // local indexes
-  const auto& loc_inds = m_dofmapper_f->getLocDofIndexes();
+  const auto& loc_inds = m_dofmapper->getLocDofIndexes();
 
   // get BC info in the edges
   const auto& bc_info_edges = m_bc_data->m_info_edges;
@@ -83,7 +58,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
   // get BC info on the nodes
   const auto& bc_info_pts = m_bc_data->m_info_points;
 
-  // assemble the bulk fluid residual
+  // assemble residual
   for (int elem_ind = 0; elem_ind < mesh_f->numOfElements(); ++elem_ind)
   {
     // the global dof indexes in this element
@@ -99,8 +74,8 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     zeroOutArray(res_loc_f);
 
     // zero out local matrices
-    zeroOutArray(mat_Mf);
-    zeroOutArray(mat_Mlf);
+    zeroOutArray(mat_M);
+    zeroOutArray(mat_Ml);
     zeroOutArray(mat_K);
     zeroOutArray(mat_D);
     zeroOutArray(mat_S);
@@ -135,13 +110,13 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
                          *m_basis_f,
                          m_diff);
 
-    LocalMassMatrix(mat_Mf,
+    LocalMassMatrix(mat_M,
                     loc_inds,
                     elemVertices,
                     m_quadrature_f->at(elem_ind),
                     *m_basis_f);
 
-    LocalLumpedMassMatrix(mat_Mlf,
+    LocalLumpedMassMatrix(mat_Ml,
                           loc_inds,
                           elemVertices,
                           m_quadrature_f->at(elem_ind),
@@ -159,10 +134,10 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
         const auto& q_points = quadrature->get_q_points();
         const auto& q_weights = quadrature->get_q_weights();
         const auto normal = mesh_f->evalEdgeNormal(elem_ind,static_cast<int>(ledge_ind));
-        for (int i = 0; i < m_dofmapper_f->local_ndof(); ++i)
+        for (int i = 0; i < m_dofmapper->local_ndof(); ++i)
         {
           const auto& basis_i = *(m_basis_f->at(i));
-          for (int j = 0; j < m_dofmapper_f->local_ndof(); ++j)
+          for (int j = 0; j < m_dofmapper->local_ndof(); ++j)
           {
             const auto& basis_j = *(m_basis_f->at(j));
             double val = 0.0;
@@ -290,18 +265,18 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     KokkosBlas::gemv("N",1.0,mat_K,U_loc,0.0,res_loc_f);
     KokkosBlas::gemv("N",1.0,mat_S,U_loc,1.0,res_loc_f);
     KokkosBlas::gemv("N",1.0-alpha_f,mat_D,U_loc,1.0,res_loc_f);
-    KokkosBlas::gemv("N",-alpha_f,mat_Mf,U_dot_loc,1.0,res_loc_f);
-    KokkosBlas::gemv("N",-(1.0 - alpha_f),mat_Mlf,U_dot_loc,1.0,res_loc_f);
+    KokkosBlas::gemv("N",-alpha_f,mat_M,U_dot_loc,1.0,res_loc_f);
+    KokkosBlas::gemv("N",-(1.0 - alpha_f),mat_Ml,U_dot_loc,1.0,res_loc_f);
 
     // now assemble the residual & first diagonal block of the Jacobian
     const std::vector<int>& cols = glob_inds;
-    std::vector<double> vals(m_dofmapper_f->local_ndof(),0.0);
-    for (int i = 0; i < m_dofmapper_f->local_ndof(); ++i)
+    std::vector<double> vals(m_dofmapper->local_ndof(),0.0);
+    for (int i = 0; i < m_dofmapper->local_ndof(); ++i)
     {
       res_view[glob_inds[i]] += res_loc_f[i];
-      for (int j = 0; j < m_dofmapper_f->local_ndof(); ++j)
+      for (int j = 0; j < m_dofmapper->local_ndof(); ++j)
       {
-        vals[j] = - beta * (alpha_f * mat_Mf(i,j) + (1.0 - alpha_f) * mat_Mlf(i,j))
+        vals[j] = - beta * (alpha_f * mat_M(i,j) + (1.0 - alpha_f) * mat_Ml(i,j))
                   + (mat_K(i,j) + (1.0 - alpha_f) * mat_D(i,j) + mat_S(i,j));
       }
       jac->sumIntoGlobalValues(glob_inds[i],static_cast<int>(cols.size()),vals.data(),cols.data());
