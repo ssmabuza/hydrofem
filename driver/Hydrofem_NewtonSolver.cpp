@@ -91,10 +91,16 @@ void NewtonSolver::addOptionsCallback(po::options_description &config)
 
 void NewtonSolver::initialize()
 {
+  // build the Jacobian 
   m_jac = m_lob->createSparseMatrix();
-  
-  
+  // build all the other objs
+  m_delta_u = m_lob->createVector();
+  m_residual = m_lob->createVector();
+  m_u_new = m_lob->createVector();
+  m_u_old = m_lob->createVector();
+  // build the linear solver
   m_linear_solver = std::make_shared<LinearSolverInterface>(m_linear_solver_name);
+  // set initialized to true
   m_initialized = true;
 }
 

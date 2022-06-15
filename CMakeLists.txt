@@ -1,11 +1,11 @@
-project(hydrofem_ng)
+project(hydrofem)
 
 cmake_minimum_required(VERSION 3.16)
 
 set(CMAKE_CXX_STANDARD 17)
 set(LINKER_LANGUAGE CXX)
 
-set(CMAKE_C_FLAGS "-fopenmp -O3 -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-fopenmp -O3 -Wall -Wextra")
 set(HOME    "~/"                      )
 
 set(MAIN    "./main/"                 )
@@ -44,9 +44,9 @@ file(GLOB SOURCES "${FE}*.cpp"
                   "${UTILS}*.cpp"
                   "${UTILS}*.hpp")
 
-add_executable(hydrofem_ng ${SOURCES})
+add_executable(hydrofem ${SOURCES})
 if (WIN32)
   
 else()
-  target_link_libraries(hydrofem_ng PRIVATE boost_program_options)
+  target_link_libraries(hydrofem PRIVATE boost_program_options)
 endif(WIN32)
