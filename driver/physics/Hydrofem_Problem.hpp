@@ -10,6 +10,7 @@
 #define __Hydrofem_Problem_HPP__
 
 #include "Hydrofem.hpp"
+#include "Hydrofem_BC.hpp"
 
 namespace hydrofem
 {
@@ -47,6 +48,9 @@ public:
   void setDofNames(const std::vector<std::string>& dof_names)
   { m_dof_names = dof_names; }
   //@}
+  
+  [[nodiscard]] virtual std::shared_ptr<BC> bc() const
+  { return nullptr; }
   
 protected:
   

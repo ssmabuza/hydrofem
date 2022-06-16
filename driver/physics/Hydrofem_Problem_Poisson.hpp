@@ -46,7 +46,7 @@ public:
   std::shared_ptr<ScalarAnalyticalExpression> exact() const
   { return m_exact; }
   
-  std::shared_ptr<BC> bc() const
+  [[nodiscard]] std::shared_ptr<BC> bc() const override
   { return m_bc; }
   
   std::shared_ptr<DirichletBCFunction> dirichletBCFunction() const

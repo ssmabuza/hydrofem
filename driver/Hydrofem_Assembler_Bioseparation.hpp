@@ -13,6 +13,7 @@
 #include "Hydrofem_FEBasis.hpp"
 #include "Hydrofem_Problem.hpp"
 #include "Hydrofem_Quadrature.hpp"
+#include "Hydrofem_AFC_Limiter.hpp"
 #include "Hydrofem_Assembler_Base.hpp"
 #include "Hydrofem_LinearObjectBuilder.hpp"
 
@@ -33,6 +34,7 @@ public:
                           const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
                           const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature)
   {
+    m_problem = problem;
     m_dofmapper = dofmapper;
     m_basis = basis;
     m_quadrature = quadrature;

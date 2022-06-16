@@ -52,26 +52,28 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
   // local indexes
   const auto& loc_inds = m_dofmapper->getLocDofIndexes();
 
+  auto bc = std::dynamic_pointer_cast<BC_Scalar>(m_problem->bc());
+  
   // get BC info in the edges
-  const auto& bc_info_edges = m_bc_data->m_info_edges;
+  const auto& bc_info_edges = bc->bcEdges();
 
   // get BC info on the nodes
-  const auto& bc_info_pts = m_bc_data->m_info_points;
+  const auto& bc_info_pts = bc->bcPoints();
 
   // assemble residual
-  for (int elem_ind = 0; elem_ind < mesh_f->numOfElements(); ++elem_ind)
+  for (int elem_ind = 0; elem_ind < mesh->numOfElements(); ++elem_ind)
   {
     // the global dof indexes in this element
-    const auto& glob_inds = mesh_f->getElementGlobalIndexes(elem_ind);
+    const auto& glob_inds = mesh->getElementGlobalIndexes(elem_ind);
     // add boundary contribution on gamma_plus
-    const auto& element = mesh_f->getElement(elem_ind);
+    const auto& element = mesh->getElement(elem_ind);
     // element vertices
-    const auto elemVertices = mesh_f->getElementVertices(elem_ind);
+    const auto elemVertices = mesh->getElementVertices(elem_ind);
 
     // zero out local vectors
     zeroOutArray(U_loc);
     zeroOutArray(U_dot_loc);
-    zeroOutArray(res_loc_f);
+    zeroOutArray(res_loc);
 
     // zero out local matrices
     zeroOutArray(mat_M);
@@ -82,16 +84,15 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     
     for (std::size_t i = 0; i < glob_inds.size(); ++i)
     {
-      U_loc[i] = U_view[glob_inds[i]];
-      U_dot_loc[i] = U_dot_view[glob_inds[i]];
+      U_loc[i] = (*U)[glob_inds[i]];
+      U_dot_loc[i] = (*U_dot)[glob_inds[i]];
     }
   
     // compute alpha_f_e
-    // TODO: compute the element limiter alpha_f here from the nodal limiters!
     {
       alpha_f = std::numeric_limits<double>::max();
       for (int glob_ind : glob_inds)
-        alpha_f = std::min(alpha_f,nodal_lim_f_view[glob_ind]);
+        alpha_f = std::min(alpha_f,(*m_nodal_limiter)[glob_ind]);
     }
     
     // compute the local conv matrix
