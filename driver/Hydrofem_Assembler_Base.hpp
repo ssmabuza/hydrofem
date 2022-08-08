@@ -76,7 +76,7 @@ public:
    * \param res_U
    * \param jac_U
    */
-  virtual void finalizeAssembly(const std::shared_ptr<FEVector>& res_U ,
+  virtual void finalizeAssembly(const std::shared_ptr<FEVector>& res_U,
                                 const std::shared_ptr<FEMatrix>& jac_U) const
   {
     applyDirichletBC(res_U,jac_U);
@@ -93,6 +93,8 @@ protected:
   bool m_apply_dirichlet_only_once = false;
   // dirichlet has been applied
   bool m_dirichlet_applied = false;
+  // flag to check if we have a steady problem or not
+
   
 };
 

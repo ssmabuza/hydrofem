@@ -20,12 +20,10 @@
 namespace hydrofem
 {
 
-// map type (regular GO type for now)
-// using TMap = Tpetra::Map<int,int>;
+// sparse matrix type for global assembly
+using FEMatrix = Eigen::SparseMatrix<double,Eigen::RowMajor>;
 // vector type for global assembly
 using FEVector = Eigen::VectorXd;
-// sparse matrix type for global assembly
-using FEMatrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
 // base class for an operator
 class Operator
@@ -35,6 +33,9 @@ public:
   virtual FEVector operator*(const FEVector& vec) const = 0;
   //! The method for transposed operation on a vector
   virtual FEVector trans_mult(const FEVector& vec) const = 0;
+protected:
+  //! possible internal op is the sparse matrix
+  std::shared_ptr<FEMatrix> m_op_internal;
 };
 
 }

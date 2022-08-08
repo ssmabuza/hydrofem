@@ -11,32 +11,52 @@
 #define __Hydrofem_Problem_Bioseparation_HPP__
 
 #include "Hydrofem_Problem.hpp"
+#include "Hydrofem_OptionHandler.hpp"
 
 namespace hydrofem
 {
 
-/**
- * Taylor dispersion experiment problem as presented in:
- * O. Boyarkine et al./ JCP 230 (2011) 2896-2914
- * Convection dominant flow to show the performance of the
- * new monotone LPS scheme and the LED schemes.
- */
 class Problem_Bioseparation
   :
-  public Problem
+  public Problem, public Optionable
 {
 public:
 
   // creates a standard LPS stabilized problem
-  explicit Problem_Bioseparation(const std::string& name = "bioseparation") : public Problem()
+  explicit Problem_Bioseparation(const std::shared_ptr<OptionHandler>& option_handler)
+    :
+    Problem(),
+    Optionable(option_handler)
   {
-    setName(name);
+    setName("bioseparation");
     setDofNames({{"conc"}});
+    parse();
   }
 
   ~Problem_Bioseparation() override = default;
   
   void init() override;
+
+  double omega() const { return m_omega; }
+  double rho_s() const { return m_rho_s; }
+  double q_max() const { return m_q_max; }
+  double Keq() const { return m_K_eq; }
+
+private:
+
+  virtual void addOptionsCallback(po::options_description &config);
+
+  // model constants
+  //@{
+  double m_omega;
+  double m_rho_s;
+  double m_q_max;
+  double m_K_eq;
+  //@}
+
+  std::shared_ptr<ScalarInitialCondition> m_ic;
+
+
   
 };
 

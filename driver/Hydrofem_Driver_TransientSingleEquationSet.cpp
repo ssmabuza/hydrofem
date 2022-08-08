@@ -8,9 +8,123 @@
 
 #include "Hydrofem_Driver_TransientSingleEquationSet.hpp"
 
+#include "Hydrofem_Mesh.hpp"
+#include "Hydrofem_IOBase.hpp"
+#include "Hydrofem_DofMapper.hpp"
+
+#include "Hydrofem_IOFactory.hpp"
+#include "Hydrofem_MeshFactory.hpp"
+#include "Hydrofem_DofMapperFactory.hpp"
+
+#include "Hydrofem_Quadrature_Tri.hpp"
+
+#include "Hydrofem_Bernstein_Basis_Triangle.hpp"
+#include "Hydrofem_Bernstein_Basis_Quadrilateral.hpp"
+
+#include "Hydrofem_LinearSolvers.hpp"
+
+#include "Hydrofem_GlobalGather.hpp"
+#include "Hydrofem_Simple_IO.hpp"
+
+#include "Hydrofem_ComputeError.hpp"
+
+#include "Hydrofem_NewtonSolver.hpp"
+#include "Hydrofem_AssemblerFactory.hpp"
+
+#include "Hydrofem_ProblemFactory.hpp"
+#include "Hydrofem_Stepper_Theta.hpp"
+
 namespace hydrofem
 {
 
+void Driver_TransientSingleEquationSet::setup()
+{
+  // form the problem mesh
+  MeshFactory mesh_factory(m_option_handler);
+  m_mesh = mesh_factory.buildMesh();
+  // form the DOF manager
+  DofMapperFactory dofmapper_factory(m_option_handler);
+  m_dofmapper = dofmapper_factory.buildDofMapper(m_mesh);
+  // form the basis (either triangle P1, or quad Q1)
+  m_basis = Bernstein_Basis_Triangle::buildElementBasis(1);
+//   m_basis = Bernstein_Basis_Quadrilateral::buildElementBasis(1);
+  // form the numerical quadrature
+  m_quadrature = std::make_shared<std::vector<std::shared_ptr<Quadrature>>>(m_mesh->numOfElements());
+  for (int elemInd = 0; elemInd < m_mesh->numOfElements(); ++elemInd)
+    m_quadrature->at(elemInd) = std::make_shared<Quadrature_Tri>(m_dofmapper->p()*2,m_mesh->getElementVertices(elemInd));
+
+  m_gather = std::make_shared<GlobalGather>(m_dofmapper);
+
+  // build the physical/continuous problem from the factory
+  auto prob_factory = std::make_shared<ProblemFactory>(m_option_handler);
+  m_problem = prob_factory->build();
+
+  // create IO
+  if (m_write_solution_vtk)
+  {
+    auto iof = IOFactory();
+    m_io = iof.buildIO(m_dofmapper,m_basis,m_xml,true);
+    m_io->setDIRName("./");
+    m_io->setFieldName("u");
+    m_io->setFinalTime(0.0);
+  }
+
+  auto assembler_factory = std::make_shared<AssemblerFactory>(m_option_handler);
+  m_discrete_problem_assembler = assembler_factory->build();
+  auto lob = std::make_shared<LinearObjectBuilder>(m_dofmapper);
+  auto ic = std::make_shared<InitialSolution>(lob,m_problem->ic_scalar());
+  m_stepper = std::make_shared<Stepper_Theta>(ic,m_discrete_problem_assembler,m_option_handler);
+  //m_solver = std::make_shared<NewtonSolver>(m_discrete_problem_assembler,m_option_handler);
+  m_U = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U->setZero();
+  m_U_exact = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U_exact->setZero();
+  m_U_gather = std::make_shared<FEArray<double>::CellBasis>(m_dofmapper->nelements(),m_dofmapper->local_ndof());
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// Solver Step //////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void Driver_TransientSingleEquationSet::solve()
+{
+  // initial time
+  double time = m_stepper->time();
+  while (time < m_final_time)
+  {
+    // solve the problem
+    m_stepper->solveStep();
+    // get the current time
+    time = m_stepper->time();
+    //
+    m_U = m_stepper->getCurrentSolution();
+//     // get the solution
+//     m_gather->doGather(*m_U_gather,m_U);
+//     // write the solution to file in paraview
+//     if (m_write_solution_vtk)
+//         m_io->writeSolutionTofile(*m_U_gather,0.0);
+    // write the solution to MATLAB
+    if (m_write_solution_matlab)
+        Simple_IO<FEVector>::writeData(false,m_U->size(),"u.mat",*m_U);
+    // compute error
+    if (m_compute_convergence_errors)
+    {
+        auto u_e_ptr = std::make_shared<std::function<double(SPoint)>>(m_problem->exact());
+        auto err = ComputeError::evaluateScalarFieldError(m_basis,m_quadrature,m_dofmapper,m_U,u_e_ptr,nullptr,Norm::L1);
+        std::cout << "L1 Error = " << err << std::endl;
+        err = ComputeError::evaluateScalarFieldError(m_basis,m_quadrature,m_dofmapper,m_U,u_e_ptr,nullptr,Norm::L2);
+        std::cout << "L2 Error = " << err << std::endl;
+        err = ComputeError::evaluateScalarFieldError(m_basis,m_quadrature,m_dofmapper,m_U,u_e_ptr,nullptr,Norm::Linf);
+        std::cout << "Linf Error = " << err << std::endl;
+    }
+
+  }
+
+
+
+
+}
 
 
 }

@@ -11,6 +11,7 @@
 
 #include "Hydrofem.hpp"
 #include "Hydrofem_BC.hpp"
+#include "Hydrofem_InitialCondition.hpp"
 
 namespace hydrofem
 {
@@ -51,7 +52,14 @@ public:
   
   [[nodiscard]] virtual std::shared_ptr<BC> bc() const
   { return nullptr; }
-  
+
+  [[nodiscard]] virtual std::shared_ptr<ScalarInitialCondition> ic_scalar() const
+  { return nullptr; }
+
+  [[nodiscard]] virtual std::shared_ptr<VectorInitialCondition> ic_vector() const
+  { return nullptr; }
+
+
 protected:
   
   // name

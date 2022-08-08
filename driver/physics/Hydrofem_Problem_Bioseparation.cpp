@@ -9,7 +9,7 @@
 #include "Hydrofem_Problem_Bioseparation.hpp"
 
 #include "Hydrofem_BC_Bioseparation.hpp"
-#include "Hydrofem_IC_Bioseparation.hpp"
+#include "Hydrofem_InitialCondition.hpp"
 #include "Hydrofem_AnalyticalExpressions.hpp"
 
 namespace hydrofem
@@ -17,12 +17,8 @@ namespace hydrofem
   
 void Problem_Bioseparation::init()
 {
-  auto ic = std::make_shared<IC_Bioseparation>();
+  m_ic = std::make_shared<ConstantScalarInitialCondition>(0.0);
   assert(ic);
-  this->set_ic(ic);
-  auto exact_ = std::make_shared<AnalyticalExpression>();
-  assert(exact_);
-  this->set_exact(exact_);
   auto u_in_ = std::make_shared<AnalyticalExpression>();
   assert(u_in_);
   this->set_Uin(u_in_);
@@ -31,7 +27,15 @@ void Problem_Bioseparation::init()
   bc->setEquation(m_equation);
   this->set_bc(bc);
 }
-/// end void init()
+
+void Problem_Bioseparation::addOptionsCallback(po::options_description &config)
+{
+  config.add_options()
+    ("prob-biosep-omega",po::value<double>(&m_omega)->default_value(0.84),"Porosity value")
+    ("prob-biosep-rho_s",po::value<double>(&m_rho_s)->default_value(1.0),"Density of membrane")
+    ("prob-biosep-q_max",po::value<double>(&m_q_max)->default_value(150.0),"Maximum binding capacity")
+    ("prob-biosep-K_eq",po::value<double>(&m_K_eq)->default_value(2.06),"Langmuir equilibrium constant");
+}
 
 }
 // end namespace hydrofem

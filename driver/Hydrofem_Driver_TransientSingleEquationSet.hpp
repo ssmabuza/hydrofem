@@ -16,27 +16,94 @@
 namespace hydrofem
 {
 
+class Mesh;
+class IOBase;
+class DofMapper;
+class FEBasis;
+class Quadrature;
+class Assembler_Base;
+class NewtonSolver;
+class Stepper;
+
+/**
+ * \brief The transient driver for solving time dependent problems.
+ *
+ */
 class Driver_TransientSingleEquationSet
   :
   public Driver
 {
 public:
 
+  /** \brief Ctor */
   explicit Driver_TransientSingleEquationSet(const std::shared_ptr<OptionHandler>& option_handler) : Driver(option_handler) {}
-  
-  virtual ~Driver_TransientSingleEquationSet() {}
 
-  void setup() {}
-  
-  void solve() {}
-  
+  /** \brief Dtor */
+  virtual ~Driver_TransientSingleEquationSet() = default;
+
+  /** \brief The main routine that calls all solvers */
+  virtual void solve();
+
+  /** \brief The setup for the solvers */
+  virtual void setup();
+
 private:
 
-  /** @brief options to be parsed for solver */
+  /** \brief options to be parsed for solver */
   virtual void addOptionsCallback(po::options_description &config)
   {
     // nothing to parse
   }
+
+protected:
+
+  // assembler for the steady problem
+  std::shared_ptr<Assembler_Base> m_discrete_problem_assembler;
+  // solver for the problem
+  std::shared_ptr<NewtonSolver> m_solver;
+  // time stepper for the problem
+  std::shared_ptr<Stepper> m_stepper;
+  // items needed for the discretization & assembly
+  std::shared_ptr<Mesh> m_mesh;
+  // dof managers
+  std::shared_ptr<DofMapper> m_dofmapper;
+  // basis functions
+  std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>> m_basis;
+  // quadrature rule
+  std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
+  // IO object
+  std::shared_ptr<IOBase> m_io;
+  // solution
+  std::shared_ptr<FEVector> m_U;
+  // gathered solution for output
+  std::shared_ptr<FEArray<double>::CellBasis> m_U_gather;
+  // exact solution
+  std::shared_ptr<FEVector> m_U_exact;
+  // IO
+  std::shared_ptr<GlobalGather> m_gather;
+  // underlying problem
+  std::shared_ptr<Problem> m_problem;
+  // other options/flags
+  bool m_xml;
+  bool m_write_solution_matlab;
+  bool m_write_solution_vtk;
+  bool m_compute_convergence_errors;
+
+  double m_final_time;
+
+  /** \brief options to be parsed for solver */
+  virtual void addOptionsCallback(po::options_description &config)
+  {
+    config.add_options()
+      ("xml-out",po::value<bool>(&m_xml)->default_value(false),"Write in XML format for VTK")
+      ("final-time",po::value<double>(&m_final_time)->required(),"Final time for the simulation")
+      ("compute-convergence-errors",po::value<bool>(&m_compute_convergence_errors)->default_value(false),"Compute convergence error")
+      ("write-solution-matlab",po::value<bool>(&m_write_sol_MATLAB)->default_value(false),"Write the solution for output in MATLAB")
+      ("write-solution-vtk",po::value<bool>(&m_write_sol_VTK)->default_value(true),"Write the solution for output in ParaView");
+  }
+
+  // the system input from bash file or command line
+  std::shared_ptr<OptionHandler> m_option_handler;
   
 };
 

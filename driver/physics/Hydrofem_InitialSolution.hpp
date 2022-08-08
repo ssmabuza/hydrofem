@@ -47,11 +47,24 @@ public:
   /**
    * \brief Ctor
    */
-  InitialSolution(const std::shared_ptr<LinearObjectBuilder>& lob) : m_lob(lob)
+  InitialSolution(const std::shared_ptr<LinearObjectBuilder>& lob,
+                  const std::shared_ptr<ScalarInitialCondition>& ic_fnc) : m_lob(lob)
   {
+    m_ic_scalar = ic_fnc;
     m_is_computed = false;
   }
-  
+
+  /**
+   * \brief Ctor
+   */
+  InitialSolution(const std::shared_ptr<LinearObjectBuilder>& lob,
+                  const std::shared_ptr<VectorInitialCondition>& ic_fnc) : m_lob(lob)
+  {
+    m_ic_vector = ic_fnc;
+    m_is_vector = true;
+    m_is_computed = false;
+  }
+
   //! Dtor
   virtual ~InitialSolution() {}
   
@@ -83,6 +96,14 @@ public:
   { throw std::runtime_error("Consistent mass matrix builder not implemented."); }
 
 protected:
+
+  // initial cond function (scalar)
+  std::shared_ptr<ScalarInitialCondition> m_ic_scalar;
+  // initial cond function (vector)
+  std::shared_ptr<VectorInitialCondition> m_ic_vector;
+  // flag for vec or scalar
+  bool m_is_vector = false;
+
   
   // the linear object builder
   std::shared_ptr<LinearObjectBuilder>  m_lob;
@@ -102,6 +123,11 @@ protected:
   mutable std::shared_ptr<FEVector>     m_lumped_mass;
   
 };
+
+
+
+
+
 
 }
 // end namespace valiant
