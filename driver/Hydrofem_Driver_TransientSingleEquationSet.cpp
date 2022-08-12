@@ -58,6 +58,7 @@ void Driver_TransientSingleEquationSet::setup()
   // build the physical/continuous problem from the factory
   auto prob_factory = std::make_shared<ProblemFactory>(m_option_handler);
   m_problem = prob_factory->build();
+  m_problem->getBC()->setMesh(m_mesh);
 
   // create IO
   if (m_write_solution_vtk)
@@ -118,12 +119,7 @@ void Driver_TransientSingleEquationSet::solve()
         err = ComputeError::evaluateScalarFieldError(m_basis,m_quadrature,m_dofmapper,m_U,u_e_ptr,nullptr,Norm::Linf);
         std::cout << "Linf Error = " << err << std::endl;
     }
-
   }
-
-
-
-
 }
 
 

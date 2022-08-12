@@ -41,6 +41,17 @@ public:
   double rho_s() const { return m_rho_s; }
   double q_max() const { return m_q_max; }
   double Keq() const { return m_K_eq; }
+  double flowrate() const { return m_flowrate; }
+  double width() const { return m_width; }
+
+  virtual std::shared_ptr<BC> getBC() const
+  { return m_bc; }
+
+  virtual std::shared_ptr<ScalarInitialCondition> ic_scalar() const
+  { return m_ic; }
+
+  virtual std::shared_ptr<ScalarAnalyticalExpression> uIn() const
+  { return m_u_in; }
 
 private:
 
@@ -52,12 +63,14 @@ private:
   double m_rho_s;
   double m_q_max;
   double m_K_eq;
+  double m_flowrate;
+  double m_width;
   //@}
 
+  std::shared_ptr<BC> m_bc;
   std::shared_ptr<ScalarInitialCondition> m_ic;
+  std::shared_ptr<ScalarAnalyticalExpression> m_u_in;
 
-
-  
 };
 
 }

@@ -44,15 +44,5 @@ ProblemFactory::build() const
   return problem;
 }
 
-/**
- * Other names for problems to be added:
- * 
- * euler-sod-shocktube
- * euler-sedov-pointblast
- * euler-radial-riemann
- * mhd-blast
- * mhd-
- */
-
 }
 // end namespace hydrofem

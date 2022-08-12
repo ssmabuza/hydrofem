@@ -50,7 +50,10 @@ public:
   { m_dof_names = dof_names; }
   //@}
   
-  [[nodiscard]] virtual std::shared_ptr<BC> bc() const
+  [[nodiscard]] virtual std::shared_ptr<AnalyticalExpression> uIn() const
+  { return nullptr; }
+
+  [[nodiscard]] virtual std::shared_ptr<BC> getBC() const
   { return nullptr; }
 
   [[nodiscard]] virtual std::shared_ptr<ScalarInitialCondition> ic_scalar() const
@@ -58,7 +61,6 @@ public:
 
   [[nodiscard]] virtual std::shared_ptr<VectorInitialCondition> ic_vector() const
   { return nullptr; }
-
 
 protected:
   

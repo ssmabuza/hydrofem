@@ -27,6 +27,11 @@ class BC_Bioseparation
 {
 public:
   
+  BC_Bioseparation()
+  {
+    m_name = "bc-bioseparation";
+  }
+
   //! \brief Ctor from \p mesh 
   BC_Bioseparation(const std::shared_ptr<Mesh>& mesh)
     :
@@ -48,7 +53,11 @@ public:
   //! \brief sets the fluid velocity profile
   void setFluidVelocity(const std::shared_ptr<std::function<SPoint(SPoint)>>& velocity)
   { m_velocity = velocity; }
-  
+
+  //! \brief gets the fluid velocity profile
+  std::shared_ptr<std::function<SPoint(SPoint)>> getFluidVelocity() const
+  { return m_velocity; }
+
   //! \brief Dtor
   virtual ~BC_Bioseparation() {}
   
