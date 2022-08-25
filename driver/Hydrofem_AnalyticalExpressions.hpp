@@ -117,5 +117,4 @@ using AnalyticalExpression = VectorAnalyticalExpression;
 }
 // end namespace hydrofem
 
-
 #endif /** __Hydrofem_AnalyticalExpressions_HPP__ */

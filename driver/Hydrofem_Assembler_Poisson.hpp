@@ -42,9 +42,7 @@ public:
     m_lob = std::make_shared<LOB>(m_dofmapper);
     m_rhs = m_lob->createVector();
     m_jac_applied = false;
-    
-    m_stiff = m_lob->createSparseMatrix();
-    buildStiffMatrix(m_stiff,m_basis,m_quadrature,m_dofmapper);
+    m_dirichlet_applied = false;
   }
   
   /** \brief Dtor */
@@ -70,18 +68,18 @@ private:
   buildStiffMatrix(const std::shared_ptr<FEMatrix>& stiff,
                    const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
                    const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature,
-                   const std::shared_ptr<const DofMapper>& dofmapper);
+                   const std::shared_ptr<const DofMapper>& dofmapper) const;
   
   /** \brief  */
   void buildRHSVector(const std::shared_ptr<FEVector>& rhs,
                       const std::shared_ptr<ScalarAnalyticalExpression>& f,
                       const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
                       const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature,
-                      const std::shared_ptr<const DofMapper>& dofmapper);
+                      const std::shared_ptr<const DofMapper>& dofmapper) const;
   
   /** \brief  */
   void applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
-                        const std::shared_ptr<FEMatrix>& jac_U) const;
+                        const std::shared_ptr<FEMatrix>& jac_U) const override;
 
   // problem defining the Poisson equation
   std::shared_ptr<Problem> m_problem;
@@ -94,11 +92,11 @@ private:
   // global quadrature
   std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
   // fixed RHS vector
-  std::shared_ptr<FEVector> m_rhs;
-  // Stiffness matrix 
-  std::shared_ptr<FEMatrix> m_stiff;
+  mutable std::shared_ptr<FEVector> m_rhs;
   // Fixed Jacobian applied
   mutable bool m_jac_applied;
+  // Dirichlet BC applied to Jacobian
+  mutable bool m_dirichlet_applied;
   
 };
 

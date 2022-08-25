@@ -130,7 +130,7 @@ void IOTriXML::printVTK(const std::string& filename,
   outw << "<?xml version=\"1.0\"?>" << std::endl;
   outw << R"(<VTKFile type="UnstructuredGrid"  version="0.1"  >)" << std::endl;
   outw << "<UnstructuredGrid>" << std::endl;
-  outw << "<Piece NumberOfPoints=\"" << dofmapper_tri->global_ndof(0) << "\" NumberOfCells=\"" << dofmapper_tri->nelements() << "\">" << std::endl;
+  outw << "<Piece NumberOfPoints=\"" << dofmapper_tri->global_ndof() << "\" NumberOfCells=\"" << dofmapper_tri->nelements() << "\">" << std::endl;
   outw << "<Points>" << std::endl;
   outw << R"(<DataArray  type="Float64"  NumberOfComponents="3"  format="ascii">)" << std::endl;
   // ------------------------------

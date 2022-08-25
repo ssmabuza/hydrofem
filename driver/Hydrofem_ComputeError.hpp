@@ -13,6 +13,7 @@
 #include "Hydrofem_DofMapper.hpp"
 #include "Hydrofem_Quadrature.hpp"
 #include "Hydrofem_FunctionElement.hpp"
+#include "Hydrofem_AnalyticalExpressions.hpp"
 
 
 namespace hydrofem
@@ -38,7 +39,16 @@ public:
                            const std::shared_ptr<const std::function<double(SPoint)>>& u_exact,
                            const std::shared_ptr<const std::function<SPoint(SPoint)>>& grad_u_exact = nullptr,
                            Norm normt = Norm::L1);
-  
+
+  static double
+  evaluateScalarFieldError(const std::shared_ptr<const std::vector<std::shared_ptr<FEBasis>>>& basis,
+                           const std::shared_ptr<const std::vector<std::shared_ptr<Quadrature>>>& quadrature,
+                           const std::shared_ptr<const DofMapper>& dofmapper,
+                           const std::shared_ptr<const FEVector>& u_numerical,
+                           const std::shared_ptr<ScalarAnalyticalExpression>& u_exact,
+                           const std::shared_ptr<VectorAnalyticalExpression>& grad_u_exact = nullptr,
+                           Norm normt = Norm::L1);
+
 };
 
 

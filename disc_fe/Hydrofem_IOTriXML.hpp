@@ -31,8 +31,8 @@ public:
     IOBase(dofmapper,fe_shape)
   {
     // creating output points and values
-    m_out_points.resize(2,std::make_shared<FEVector>(dofmapper->global_ndof(0)));
-    m_out_vals = std::make_shared<FEVector>(dofmapper->global_ndof(0));
+    m_out_points.resize(2,std::make_shared<FEVector>(dofmapper->global_ndof()));
+    m_out_vals = std::make_shared<FEVector>(dofmapper->global_ndof());
     m_fsi = fsi;
     m_steady = steady;
   }

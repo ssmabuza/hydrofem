@@ -39,13 +39,13 @@ public:
    * \param beta    - system multiplier (which is 1 most of the time)
    */
   virtual
-  void buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
-                                const std::shared_ptr<const FEVector>& U_dot,
-                                const std::shared_ptr<FEVector>& res_U,
-                                const std::shared_ptr<FEMatrix>& jac_U,
-                                const double time,
-                                const double delta_t,
-                                const double beta) const { }
+  void buildResidualAndJacobian(const std::shared_ptr<const FEVector>& /*U*/,
+                                const std::shared_ptr<const FEVector>& /*U_dot*/,
+                                const std::shared_ptr<FEVector>& /*res_U*/,
+                                const std::shared_ptr<FEMatrix>& /*jac_U*/,
+                                const double /*time*/,
+                                const double /*delta_t*/,
+                                const double /*beta*/) const { }
 
   /**
    * \brief The non-transient assembly (steady solver)
@@ -56,10 +56,10 @@ public:
    * \param beta  - system multiplier
    */
   virtual
-  void buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
-                                const std::shared_ptr<FEVector>& res_U,
-                                const std::shared_ptr<FEMatrix>& jac_U,
-                                const double beta) const { }
+  void buildResidualAndJacobian(const std::shared_ptr<const FEVector>& /*U*/,
+                                const std::shared_ptr<FEVector>& /*res_U*/,
+                                const std::shared_ptr<FEMatrix>& /*jac_U*/,
+                                const double /*beta*/) const { }
 
   /**
    * \brief Applies Dirichlet BC to global system
@@ -67,8 +67,8 @@ public:
    * 
    */
   virtual
-  void applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
-                        const std::shared_ptr<FEMatrix>& jac_U) const { }
+  void applyDirichletBC(const std::shared_ptr<FEVector>& /*res_U*/,
+                        const std::shared_ptr<FEMatrix>& /*jac_U*/) const { }
                                 
   /**
    * \brief this will properly call fill complete in the Jacobian and do any post-processing

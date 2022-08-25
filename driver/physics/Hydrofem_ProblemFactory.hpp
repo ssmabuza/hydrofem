@@ -41,7 +41,7 @@ private:
   {
     // nothing to parse
     config.add_options()
-      ("problem-name",po::value<std::string>(&m_problem_name)->default_value("taylor-dispersion"),
+      ("problem-name",po::value<std::string>(&m_problem_name)->default_value("poisson"),
        "Continuous problem name.");
   }
   

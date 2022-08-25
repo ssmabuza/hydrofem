@@ -12,7 +12,6 @@
 #include "Hydrofem.hpp"
 #include "Hydrofem_Mesh.hpp"
 #include "Hydrofem_BC_Scalar.hpp"
-#include "Hydrofem_Equation.hpp"
 
 namespace hydrofem
 {
@@ -26,6 +25,8 @@ class BC_Bioseparation
   public BC_Scalar
 {
 public:
+
+  using Ptr = std::shared_ptr<BC_Bioseparation>;
   
   BC_Bioseparation()
   {

@@ -18,17 +18,16 @@ namespace hydrofem
 void DriverFactory::addOptionsCallback(po::options_description &config)
 {
   config.add_options()
-    ("driver",po::value<std::string>(&m_driver_name)->default_value("SteadySingleEquationSet"),"The driver name");
+    ("driver",po::value<std::string>(&m_driver_name)->default_value("steady-single-equationset"),"The driver name");
 }
-  
-  
+
 std::shared_ptr<Driver> DriverFactory::
 buildDriver()
 {
   std::shared_ptr<Driver> driver;
-  if (m_driver_name == "SteadySingleEquationSet")
+  if (m_driver_name == "steady-single-equationset")
     driver = std::make_shared<Driver_SteadySingleEquationSet>(m_option_handler);
-  else if (m_driver_name == "TransientSingleEquationSet")
+  else if (m_driver_name == "transient-single-equationset")
     driver = std::make_shared<Driver_TransientSingleEquationSet>(m_option_handler);
   assert(driver);
   return driver;

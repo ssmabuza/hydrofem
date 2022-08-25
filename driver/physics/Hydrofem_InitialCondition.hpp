@@ -36,7 +36,6 @@ public:
 
 };
 
-
 /**
  * \class InitialCondition base class for vector initial conditions
  */
@@ -57,9 +56,6 @@ public:
   
 };
 
-using InitialCondition = VectorInitialCondition;
-
-
 /**
  * 
  * Some simple initial conditions
@@ -73,7 +69,7 @@ public:
   
   ZeroScalarInitialCondition() {}
 
-  ~ZeroScalarInitialCondition() {}
+  virtual ~ZeroScalarInitialCondition() {}
 
   double evaluate(const SPoint&) const override
   {
@@ -90,18 +86,19 @@ public:
   
   using LVec = VectorInitialCondition::LVec;
   
-  ZeroVectorInitialCondition(int n) : m_neq(n) {}
+  explicit ZeroVectorInitialCondition(int n) : m_neq(n) {}
 
-  ~ZeroVectorInitialCondition() {}
+  virtual ~ZeroVectorInitialCondition() {}
 
   LVec evaluate(const SPoint&) const override
   {
-    return createKArray<LVec>(m_neq);
+    auto res = createKArray<LVec>(m_neq); zeroOutArray(res);
+    return res;
   }
   
 private:
 
-  m_neq;
+  int m_neq;
   
 };
 
@@ -111,9 +108,9 @@ class ConstantScalarInitialCondition
 {
 public:
   
-  ConstantScalarInitialCondition(double val) : m_val(val) {}
+  explicit ConstantScalarInitialCondition(double val) : m_val(val) {}
 
-  ~ConstantScalarInitialCondition() {}
+  virtual ~ConstantScalarInitialCondition() {}
 
   double evaluate(const SPoint&) const override
   {
@@ -134,14 +131,14 @@ public:
   
   using LVec = VectorInitialCondition::LVec;
   
-  ConstantVectorInitialCondition(std::vector<double> val) : m_val(val) {}
+  ConstantVectorInitialCondition(const std::vector<double>& val) : m_val(val) {}
 
   ~ConstantVectorInitialCondition() {}
 
   LVec evaluate(const SPoint&) const override
   {
     auto ret = createKArray<LVec>(m_val.size());
-    for (std::size_t i = 0; i < m_val; ++i) ret(i) = m_val.at(i);
+    for (std::size_t i = 0; i < m_val.size(); ++i) ret(i) = m_val.at(i);
     return ret;
   }
   
@@ -151,14 +148,14 @@ private:
   
 };
 
-
 class FunctionalScalarInitialCondition
   :
   public ScalarInitialCondition
 {
 public:
   
-  FunctionalScalarInitialCondition(std::function<double(SPoint)> val) : m_val(val) {}
+  explicit
+  FunctionalScalarInitialCondition(const std::function<double(SPoint)>& val) : m_val(val) {}
 
   ~FunctionalScalarInitialCondition() {}
 
@@ -169,7 +166,7 @@ public:
 
 private:
 
-  std::function<double(SPoint)> m_val;
+  const std::function<double(SPoint)>& m_val;
   
 };
 
@@ -181,7 +178,8 @@ public:
   
   using LVec = VectorInitialCondition::LVec;
   
-  FunctionalVectorInitialCondition(std::function<LVec(SPoint)> val) : m_val(val) {}
+  explicit
+  FunctionalVectorInitialCondition(const std::function<LVec(SPoint)>& val) : m_val(val) {}
 
   ~FunctionalVectorInitialCondition() {}
 
@@ -192,7 +190,7 @@ public:
 
 private:
 
-  std::function<LVec(SPoint)> m_val;
+  const std::function<LVec(SPoint)>& m_val;
   
 };
 

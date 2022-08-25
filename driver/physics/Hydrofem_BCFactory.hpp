@@ -33,25 +33,14 @@ public:
   {
     m_option_handler = option_handler;
     m_mesh = mesh;
+    m_option_handler->parse();
   }
-  
-  BCFactory(const std::shared_ptr<OptionHandler>& option_handler,
-            const std::shared_ptr<Mesh>& mesh,
-            const std::shared_ptr<Equation<double>>& equation)
-    :
-    Optionable(option_handler)
-  {
-    m_option_handler = option_handler;
-    m_mesh = mesh;
-    m_equation = equation;
-  }
-  
   
   virtual ~BCFactory() {}
   
   std::shared_ptr<BC> build();
 
-  void addOptionsCallback(po::options_description & config)
+  void addOptionsCallback(po::options_description& config)
   {
     config.add_options()
       ("bc",po::value<std::string>(&m_bc_name)->default_value("bc-scalar"),"The BC name");
@@ -60,10 +49,7 @@ public:
 private:
 
   std::shared_ptr<OptionHandler> m_option_handler;
-  
   std::shared_ptr<Mesh> m_mesh;
-  std::shared_ptr<Equation<double>> m_equation;
-  
   std::string m_bc_name;
   
 };

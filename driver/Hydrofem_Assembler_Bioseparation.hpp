@@ -61,6 +61,50 @@ public:
                                 
 private:
     
+  // for alternative matrix based implementation
+  // struct MatrixBasedImpl
+  // {
+
+  //   void init();
+
+  //   void computeGlobalConvectionPlusOutletMatrix();
+
+  //   void computeGlobalAdsorptionMatrix();
+
+  //   void computeGlobalStiffnessMatrix();
+
+  //   void computeGlobalLumpedMatrix();
+
+
+  //   bool m_initialized = false;
+
+  //   std::shared_ptr<FEMatrix> m_mat_M;
+  //   std::shared_ptr<FEMatrix> m_mat_S;
+  //   std::shared_ptr<FEMatrix> m_mat_K;
+
+  // };
+
+  // AFC calculations to be done
+  // struct AFC_Group
+  // {
+
+  //   void computeFluxEdgeGraph();
+
+  //   std::shared_ptr<FEMatrix> m_mat_D;
+  //   std::shared_ptr<FEVector> m_mat_Ml;
+
+  //   std::shared_ptr<FEVector> m_graph_M;
+  //   std::shared_ptr<FEVector> m_graph_D;
+  //   std::shared_ptr<FEVector> m_graph_F;
+
+  // };
+
+  // residual based implementation
+  // void buildResidualAndJacobian_ResidualBased() const;
+
+  // matrix based implementation
+  // void buidResidualAndJacobian_MatrixAndGraphBased() const;
+
   // problem defining the Bioseparation equation and parameters
   std::shared_ptr<Problem> m_problem;
   // limiter 

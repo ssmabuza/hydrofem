@@ -10,20 +10,24 @@
 #define __Hydrofem_Driver_TransientSingleEquationSet_HPP__
 
 #include "Hydrofem_Driver.hpp"
+#include "Hydrofem_SPoint.hpp"
+#include "Hydrofem_LocalArray.hpp"
+#include "Hydrofem_GlobalGather.hpp"
+#include "Hydrofem_EigenFEVecMat.hpp"
 #include "Hydrofem_OptionHandler.hpp"
-
 
 namespace hydrofem
 {
 
 class Mesh;
 class IOBase;
-class DofMapper;
-class FEBasis;
-class Quadrature;
-class Assembler_Base;
-class NewtonSolver;
+class FEBasis; 
 class Stepper;
+class Problem;
+class DofMapper;
+class Quadrature;
+class NewtonSolver;
+class Assembler_Base;
 
 /**
  * \brief The transient driver for solving time dependent problems.
@@ -36,7 +40,12 @@ class Driver_TransientSingleEquationSet
 public:
 
   /** \brief Ctor */
-  explicit Driver_TransientSingleEquationSet(const std::shared_ptr<OptionHandler>& option_handler) : Driver(option_handler) {}
+  explicit Driver_TransientSingleEquationSet(const std::shared_ptr<OptionHandler>& option_handler)
+    :
+    Driver(option_handler)
+  {
+    option_handler->parse();
+  }
 
   /** \brief Dtor */
   virtual ~Driver_TransientSingleEquationSet() = default;
@@ -46,14 +55,6 @@ public:
 
   /** \brief The setup for the solvers */
   virtual void setup();
-
-private:
-
-  /** \brief options to be parsed for solver */
-  virtual void addOptionsCallback(po::options_description &config)
-  {
-    // nothing to parse
-  }
 
 protected:
 
@@ -98,8 +99,8 @@ protected:
       ("xml-out",po::value<bool>(&m_xml)->default_value(false),"Write in XML format for VTK")
       ("final-time",po::value<double>(&m_final_time)->required(),"Final time for the simulation")
       ("compute-convergence-errors",po::value<bool>(&m_compute_convergence_errors)->default_value(false),"Compute convergence error")
-      ("write-solution-matlab",po::value<bool>(&m_write_sol_MATLAB)->default_value(false),"Write the solution for output in MATLAB")
-      ("write-solution-vtk",po::value<bool>(&m_write_sol_VTK)->default_value(true),"Write the solution for output in ParaView");
+      ("write-solution-matlab",po::value<bool>(&m_write_solution_matlab)->default_value(false),"Write the solution for output in MATLAB")
+      ("write-solution-vtk",po::value<bool>(&m_write_solution_vtk)->default_value(true),"Write the solution for output in ParaView");
   }
 
   // the system input from bash file or command line

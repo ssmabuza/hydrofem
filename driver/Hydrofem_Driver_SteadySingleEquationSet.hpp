@@ -20,11 +20,12 @@ namespace hydrofem
 
 class Mesh;
 class IOBase;
-class DofMapper;
 class FEBasis; 
+class Problem;
+class DofMapper;
 class Quadrature;
-class Assembler_Base;
 class NewtonSolver;
+class Assembler_Base;
 
 /**
  * \brief A pure base class for the driver 
@@ -36,9 +37,11 @@ class Driver_SteadySingleEquationSet
 public:
   
   /** \brief Ctor */
-  explicit Driver_SteadySingleEquationSet(const std::shared_ptr<OptionHandler>& option_handler) : Driver(option_handler)
+  explicit Driver_SteadySingleEquationSet(const std::shared_ptr<OptionHandler>& option_handler)
+    : Driver(option_handler)
   {
     m_option_handler = option_handler;
+    option_handler->parse();
   }
   
   /** \brief Dtor */
@@ -76,6 +79,7 @@ protected:
   std::shared_ptr<GlobalGather> m_gather;
   // underlying problem
   std::shared_ptr<Problem> m_problem;
+  
   // other options/flags
   bool m_xml;
   bool m_write_solution_matlab;
@@ -88,8 +92,8 @@ protected:
     config.add_options()
       ("xml-out",po::value<bool>(&m_xml)->default_value(false),"Write in XML format for VTK")
       ("compute-convergence-errors",po::value<bool>(&m_compute_convergence_errors)->default_value(false),"Compute convergence error")
-      ("write-solution-matlab",po::value<bool>(&m_write_sol_MATLAB)->default_value(false),"Write the solution for output in MATLAB")
-      ("write-solution-vtk",po::value<bool>(&m_write_sol_VTK)->default_value(true),"Write the solution for output in ParaView");
+      ("write-solution-matlab",po::value<bool>(&m_write_solution_matlab)->default_value(false),"Write the solution for output in MATLAB")
+      ("write-solution-vtk",po::value<bool>(&m_write_solution_vtk)->default_value(true),"Write the solution for output in ParaView");
   }
   
   // the system input from bash file or command line

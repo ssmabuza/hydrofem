@@ -19,14 +19,14 @@ class DofMapperFactory
   :
   public Optionable
 {
+  /** \brief Ctor */
+  DofMapperFactory() = delete;
+  
 public:
   
-  /** @brief Ctor */
-  DofMapperFactory() = default;
-  
   /**
-   * @brief Ctor from parameter list
-   * @param pl - input parameters
+   * \brief Ctor from parameter list
+   * \param pl - input parameters
    * */
   explicit DofMapperFactory(const std::shared_ptr<OptionHandler>& option_handler) : Optionable(option_handler)
   {
@@ -34,23 +34,23 @@ public:
     m_option_handler->parse();
   }
 
-  /** @brief Dtor */
+  /** \brief Dtor */
   virtual ~DofMapperFactory() = default;
 
-  /** @brief builds dofmapper using the existing parameter list */
+  /** \brief builds dofmapper using the existing parameter list */
   [[nodiscard]] std::shared_ptr<DofMapper> buildDofMapper(const std::shared_ptr<Mesh>& mesh) const;
   
 private:
 
-  /** @brief builds dofmapper from mesh and order of basis */
+  /** \brief builds dofmapper from mesh and order of basis */
   static std::shared_ptr<DofMapper> buildDofMapper(const std::shared_ptr<Mesh>& mesh,
                                                    const int basis_order);
   
-  /** @brief options to be parsed for solver */
+  /** \brief options to be parsed for solver */
   void addOptionsCallback(po::options_description &config)
   {
     config.add_options()
-      ("basisOrder",po::value<int>(&m_basis_order)->default_value(1),"The finite element basis order");
+      ("basis-order",po::value<int>(&m_basis_order)->default_value(1),"The finite element basis order");
   }
   
   // basis order

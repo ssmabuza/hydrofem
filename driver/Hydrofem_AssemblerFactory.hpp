@@ -10,6 +10,9 @@
 #ifndef __Hydrofem_AssemblerFactory_HPP__
 #define __Hydrofem_AssemblerFactory_HPP__
 
+#include "Hydrofem_FEBasis.hpp"
+#include "Hydrofem_Problem.hpp"
+#include "Hydrofem_Quadrature.hpp"
 #include "Hydrofem_OptionHandler.hpp"
 #include "Hydrofem_Assembler_Base.hpp"
 
@@ -23,12 +26,19 @@ class AssemblerFactory
 public:
 
   //! \brief Ctor
-  AssemblerFactory(const std::shared_ptr<OptionHandler>& option_handler)
+  AssemblerFactory(const std::shared_ptr<OptionHandler>& option_handler,
+                   const std::shared_ptr<Problem>& problem,
+                   const std::shared_ptr<DofMapper>& dofmapper,
+                   const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
+                   const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature)
     :
     Optionable(option_handler)
   {
-    m_option_handler = option_handler;
-    parse();
+    option_handler->parse();
+    m_dofmapper = dofmapper;
+    m_basis = basis;
+    m_quadrature = quadrature;
+    m_problem = problem;
   }
   
   //! \brief Dtor
@@ -44,14 +54,20 @@ private:
   virtual void addOptionsCallback(po::options_description &config)
   {
     config.add_options()
-      ("Assembler",po::value<std::string>(&m_name)->default_value("Poisson"),"Assembler name.");
+      ("assembler",po::value<std::string>(&m_name)->default_value("poisson"),"Assembler name.");
   }
   
   // name of the assembler 
   std::string m_name;
-  // option handler to pass to assembler
-  std::shared_ptr<OptionHandler> m_option_handler;
-  
+  // problem defining the Poisson equation
+  std::shared_ptr<Problem> m_problem;
+  // the dof manager
+  std::shared_ptr<DofMapper> m_dofmapper;
+  // basis functions
+  std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>> m_basis;
+  // global quadrature
+  std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
+
 };
 
 }

@@ -24,7 +24,7 @@ class Problem_Poisson
 public:
 
   // creates a standard LPS stabilized problem
-  explicit Problem_Poisson(const std::string& name = "poisson") : public Problem()
+  explicit Problem_Poisson(const std::string& name = "poisson") : Problem()
   {
     setName(name);
     setDofNames({{"u"}});
@@ -34,23 +34,26 @@ public:
   
   void init() override;
   
-  void set_exact(const std::shared_ptr<ScalarAnalyticalExpression>& exact_)
+  void setExactSolution(const std::shared_ptr<ScalarAnalyticalExpression>& exact_)
   { m_exact = exact_; }
   
-  void set_bc(const std::shared_ptr<BC>& bc_)
+  void setBoundaryCondition(const std::shared_ptr<BC>& bc_)
   { m_bc = bc_; }
   
-  std::shared_ptr<ScalarAnalyticalExpression> rhsFunction() const
-  { return m_rhs_fnc; }
-  
-  std::shared_ptr<ScalarAnalyticalExpression> exact() const
-  { return m_exact; }
-  
-  [[nodiscard]] std::shared_ptr<BC> bc() const override
+  [[nodiscard]] std::shared_ptr<BC> getBoundaryCondition() const override
   { return m_bc; }
   
-  std::shared_ptr<DirichletBCFunction> dirichletBCFunction() const
+  std::shared_ptr<ScalarAnalyticalExpression> getExactSolution() const override
+  { return m_exact; }
+  
+  std::shared_ptr<ScalarAnalyticalExpression> getBoundaryFunction() const
   { return m_dirichlet_bc_fnc; }
+
+  // RHS function in Poisson equation strong form
+  std::shared_ptr<ScalarAnalyticalExpression> getRHSFunction() const
+  { return m_rhs_fnc; }
+
+  // steady problems do not need initial condition function
   
 protected:
 
@@ -61,7 +64,7 @@ protected:
   // source function
   std::shared_ptr<ScalarAnalyticalExpression> m_rhs_fnc;
   // Dirichlet boundary values
-  std::shared_ptr<DirichletBCFunction> m_dirichlet_bc_fnc;
+  std::shared_ptr<ScalarAnalyticalExpression> m_dirichlet_bc_fnc;
   
 };
 

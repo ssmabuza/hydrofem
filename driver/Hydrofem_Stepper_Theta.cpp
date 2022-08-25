@@ -17,7 +17,7 @@ void Stepper_Theta::solveStep()
   if (m_stepnum == 0) m_time = m_t0;
   // initialize
   if (std::fabs(m_time - m_t0) < m_delta_t/2.0)
-    *m_u_new = *(m_ic->get_evaluatedFieldGlobal());
+    *m_u_new = *(m_ic->get_evaluatedField());
   // safe copy of u
   *m_u_old = *m_u_new;
   // safe copy of u_dot

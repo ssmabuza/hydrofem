@@ -33,6 +33,7 @@ public:
   {
     // get nonlinear problem
     m_nlp = nlp;
+    option_handler->parse();
   }
   
   /**  \brief  */
@@ -80,6 +81,8 @@ private:
   bool                                   m_inexact;
   //! is initialized
   bool                                   m_initialized;
+  //! 
+  std::string                            m_linear_solver_name;
   
 };
 

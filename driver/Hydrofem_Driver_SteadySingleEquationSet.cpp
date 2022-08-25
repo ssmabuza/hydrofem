@@ -65,18 +65,17 @@ void Driver_SteadySingleEquationSet::setup()
     auto iof = IOFactory();
     m_io = iof.buildIO(m_dofmapper,m_basis,m_xml,true);
     m_io->setDIRName("./");
-    m_io->setFieldName("u");
+    m_io->setFieldName(/*"u"*/ m_problem->dofNames().at(0));
     m_io->setFinalTime(0.0);
   }
   
-  auto assembler_factory = std::make_shared<AssemblerFactory>(m_option_handler);
+  auto assembler_factory = std::make_shared<AssemblerFactory>(m_option_handler,m_problem,m_dofmapper,m_basis,m_quadrature);
   m_discrete_problem_assembler = assembler_factory->build();
-  m_solver = std::make_shared<NewtonSolver>(m_discrete_problem_assembler,m_option_handler);
+  m_solver = std::make_shared<NewtonSolver>(m_option_handler,m_discrete_problem_assembler);
   m_U = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U->setZero();
   m_U_exact = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U_exact->setZero();
   m_U_gather = std::make_shared<FEArray<double>::CellBasis>(m_dofmapper->nelements(),m_dofmapper->local_ndof());
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -95,11 +94,11 @@ void Driver_SteadySingleEquationSet::solve()
     m_io->writeSolutionTofile(*m_U_gather,0.0);
   // write the solution to MATLAB
   if (m_write_solution_matlab)
-    Simple_IO<FEVector>::writeData(false,m_U->size(),"u.mat",*m_U);
+    Simple_IO<FEVector>::writeData(false,m_U->size(),m_problem->dofNames().at(0) + ".mat",*m_U);
   // compute error
-  if (m_compute_convergence_errors)
+  if (m_compute_convergence_errors && m_problem->getExactSolution())
   {
-    auto u_e_ptr = std::make_shared<std::function<double(SPoint)>>(m_problem->exact());
+    const auto u_e_ptr = m_problem->getExactSolution();
     auto err = ComputeError::evaluateScalarFieldError(m_basis,m_quadrature,m_dofmapper,m_U,u_e_ptr,nullptr,Norm::L1);
     std::cout << "L1 Error = " << err << std::endl;
     err = ComputeError::evaluateScalarFieldError(m_basis,m_quadrature,m_dofmapper,m_U,u_e_ptr,nullptr,Norm::L2);

@@ -75,7 +75,7 @@ public:
   virtual inline const int& global(const int i_elem, const int local) const 
   { return m_glob_indexes.at(i_elem).at(local); }
 
-  virtual int global_ndof(int eq = 0) const
+  virtual int global_ndof() const
   { return m_gndof; }
 
   virtual int local_ndof() const

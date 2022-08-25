@@ -41,7 +41,7 @@ DofMapperFactory::buildDofMapper(const std::shared_ptr<Mesh> &mesh, const int ba
   else {
     
     std::stringstream ss;
-    ss << "Error in DofMapperFactory::buildDofMapper, invalid mesh provided.";
+    ss << "Error in DofMapperFactory::buildDofMapper, invalid mesh provided.\n";
     throw std::logic_error(ss.str());
     
   }

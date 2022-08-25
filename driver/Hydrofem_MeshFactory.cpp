@@ -146,10 +146,13 @@ MeshFactory::buildMesh() const
       mesh = std::make_shared<Mesh2D_Quad>(m_filename);
   }
   
+  // check if mesh is built  
+  assert(mesh);
+  
   // Write original mesh to MATLAB if requested so we can view it solo
   if (m_write_to_matlab)
     mesh->writeMeshToFile_MATLAB("original_mesh");
-  
+    
   return mesh;
 }
 

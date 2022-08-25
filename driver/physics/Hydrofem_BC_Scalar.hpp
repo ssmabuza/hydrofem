@@ -13,7 +13,6 @@
 
 #include "Hydrofem_BC.hpp"
 #include "Hydrofem_Mesh.hpp"
-#include "Hydrofem_Equation.hpp"
 
 namespace hydrofem
 {
@@ -21,7 +20,7 @@ namespace hydrofem
 /**
  * \brief A class for general boundary 
  *        conditions for scalar problems
- *        on some nodal scalar finite element.
+ *        on some nodal scalar finite elements.
  */
 class BC_Scalar
   :
@@ -68,13 +67,16 @@ protected:
   
 public:
   
+  using BCInfoPtr = std::shared_ptr<BCInfo>;
+  using BCInfoPeriodicPtr = std::shared_ptr<BCInfoPeriodic>;
+
   //! \brief Ctor
   explicit BC_Scalar() : BC() {}
 
   //! \brief Ctor from \p mesh
   explicit BC_Scalar(const std::shared_ptr<Mesh>& mesh) : BC(mesh)
   {
-    m_name = "Scalar BC";
+    m_name = "bc-scalar";
   }
   
   //! \brief Dtor 
@@ -84,14 +86,14 @@ public:
   void initializeBoundaryPointsToDirichletEverywhere();
   
   // iterator over points/edges 
-  using BCIt = std::unordered_map<int,std::unique_ptr<BCInfo>>::iterator;
+  using BCIt = std::unordered_map<int,BCInfoPtr>::iterator;
   // constant iterator over points/edges
-  using BCConstIt = std::unordered_map<int,std::unique_ptr<BCInfo>>::const_iterator;
+  using BCConstIt = std::unordered_map<int,BCInfoPtr>::const_iterator;
   // container for BC data
-  using BCIterable = std::unordered_map<int,std::unique_ptr<BCInfo>>;
+  using BCIterable = std::unordered_map<int,BCInfoPtr>;
   
   
-  BCIterable bcPoints() const
+  const BCIterable& bcPoints() const
   { return m_bc_info_points; }
 
   BCIterable bcEdges() const
@@ -117,7 +119,7 @@ public:
     return m_bc_info_edges.end();
   }
   
-  bool isDirichlet(BCConstIt it) const
+  bool isDirichlet(const BCConstIt& it) const
   { return (it->second->m_boundary_condition_type == typeDirichlet); }
   
   bool isGammaPlus(BCConstIt it) const
@@ -136,13 +138,13 @@ protected:
   
   void initialize() override;
 
+
   // this is for weak/integral based boundary calculations in 2D
-  std::unordered_map<int,std::unique_ptr<BCInfo>> m_bc_info_edges;
+  std::unordered_map<int,BCInfoPtr> m_bc_info_edges;
   // this is for point/nodal based boundary conditions
-  std::unordered_map<int,std::unique_ptr<BCInfo>> m_bc_info_points;
+  std::unordered_map<int,BCInfoPtr> m_bc_info_points;
   // this is for point/nodal based boundary conditions periodic
-  std::unordered_map<int,std::unique_ptr<BCInfoPeriodic>> m_bc_info_points_per;
-  
+  std::unordered_map<int,BCInfoPeriodicPtr> m_bc_info_points_per;
   
 };
 

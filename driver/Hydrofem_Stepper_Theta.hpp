@@ -12,7 +12,7 @@
 #include "Hydrofem.hpp"
 
 #include "Hydrofem_Stepper.hpp"
-#include "Hydrofem_LinearSolvers.hpp"
+#include "Hydrofem_NewtonSolver.hpp"
 #include "Hydrofem_Assembler_Base.hpp"
 #include "Hydrofem_InitialSolution.hpp"
 #include "Hydrofem_LinearObjectBuilder.hpp"
@@ -51,6 +51,8 @@ public:
     m_inexact = true;
     // get the assembler
     m_assembler = assembler;
+    // build the nonlinear solver
+    m_nlsolver = std::make_shared<NewtonSolver>(option_handler,m_assembler);
   }
 
   //! Dtor
@@ -98,12 +100,14 @@ public:
   }
   
   //! \brief routine for computing delta t from CFL
-  [[maybe_unused]] void computeDeltaT(double& delta_t) {}
+  [[maybe_unused]] void computeDeltaT(double& /*delta_t*/) {}
   
 private:
   
   //! tool for assembling residual and Jacobian
   std::shared_ptr<Assembler_Base>  m_assembler;
+  //! Nonlinear solver
+  std::shared_ptr<NewtonSolver>    m_nlsolver;
   //! initial condition function
   std::shared_ptr<InitialSolution> m_ic;
   //! Jac op

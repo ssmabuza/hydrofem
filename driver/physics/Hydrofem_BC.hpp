@@ -12,7 +12,7 @@
 #include "Hydrofem.hpp"
 
 #include "Hydrofem_Mesh.hpp"
-#include "Hydrofem_Equation.hpp"
+#include "Hydrofem_LocalArray.hpp"
 #include "Hydrofem_AnalyticalExpressions.hpp"
 
 namespace hydrofem
@@ -67,18 +67,18 @@ protected:
   
 };
 
-class DirichletBCFunction
+class ScalarDirichletBCFunction
 {
 public:
   
   //!
-  DirichletBCFunction(const std::shared_ptr<ScalarAnalyticalExpression>& bc_fnc)
+  ScalarDirichletBCFunction(const std::shared_ptr<ScalarAnalyticalExpression>& bc_fnc)
   {
     m_bc_fnc = bc_fnc;
   }
   
   double operator()(SPoint x) const
-  { return m_bc_fnc(x); }
+  { return (*m_bc_fnc)(x); }
   
 protected:
 
@@ -92,18 +92,18 @@ class VectorDirichletBCFunction
 public:
   
   //! \brief Ctor 
-  VectorDirichletBCFunction(const std::shared_ptr<AnalyticalExpression>& bc_fnc)
+  VectorDirichletBCFunction(const std::shared_ptr<VectorAnalyticalExpression>& bc_fnc)
   {
     m_bc_fnc = bc_fnc;
   }
 
-  LVec operator() (SPoint x) const
-  { return m_bc_fnc(x); }
+  decltype(auto) operator() (SPoint x) const
+  { return (*m_bc_fnc)(x); }
 
 protected:
 
-  // boundary function, can be evaluated at x & t
-  std::shared_ptr<AnalyticalExpression> m_bc_fnc;
+  // boundary function, can be evaluated at x
+  std::shared_ptr<VectorAnalyticalExpression> m_bc_fnc;
   
 };
 

@@ -10,7 +10,6 @@
 #include "Hydrofem_NewtonSolver.hpp"
 #include "Hydrofem_Assembler_Base.hpp"
 
-
 namespace hydrofem
 {
 

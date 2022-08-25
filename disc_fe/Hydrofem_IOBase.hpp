@@ -41,10 +41,10 @@ public:
   virtual ~IOBase() = default;
 
   /** \brief Main routine for writing high order solution into file : cell basis format */
-  virtual void writeSolutionTofile(const FEArray<double>::CellBasis& sol, const double time) const {}
+  virtual void writeSolutionTofile(const FEArray<double>::CellBasis& /*sol*/, const double /*time*/) const {}
   
   /** \brief Main routine for writing high order solution into file : distr vector format */
-  virtual void writeSolutionTofile(const std::shared_ptr<FEVector>& sol, const double time) const {}
+  virtual void writeSolutionTofile(const std::shared_ptr<FEVector>& /*sol*/, const double /*time*/) const {}
 
   void setFieldName(const std::string& field_name)
   { m_field_name = field_name; }

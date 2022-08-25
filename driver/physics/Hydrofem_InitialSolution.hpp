@@ -9,27 +9,23 @@
 #ifndef __Hydrofem_InitialSolution_HPP__
 #define __Hydrofem_InitialSolution_HPP__
 
-// #include "Term.hpp"
 #include "Hydrofem_FEBasis.hpp"
-#include "Hydrofem_Equation.hpp"
 #include "Hydrofem_DofMapper.hpp"
 #include "Hydrofem_Quadrature.hpp"
 #include "Hydrofem_LocalArray.hpp"
 #include "Hydrofem_GlobalGather.hpp"
 #include "Hydrofem_EigenFEVecMat.hpp"
-#include "Hydrofem_GlobalScatter.hpp"
 #include "Hydrofem_InitialCondition.hpp"
-#include "Hydrofem_GlobalSystemGather.hpp"
-#include "Hydrofem_GlobalSystemScatter.hpp"
 #include "Hydrofem_LinearObjectBuilder.hpp"
 
 namespace hydrofem
 {
 
+//! TODO:   Specialize for scalars and vectors
+
 /**
- * \brief Nodal projection of the initial data
+ * \brief Projection of the initial condition function into system vector (default: nodal)
  */
-template <typename IC_Type>
 class InitialSolution 
 {
 public:
@@ -50,86 +46,110 @@ public:
   InitialSolution(const std::shared_ptr<LinearObjectBuilder>& lob,
                   const std::shared_ptr<ScalarInitialCondition>& ic_fnc) : m_lob(lob)
   {
-    m_ic_scalar = ic_fnc;
-    m_is_computed = false;
-  }
-
-  /**
-   * \brief Ctor
-   */
-  InitialSolution(const std::shared_ptr<LinearObjectBuilder>& lob,
-                  const std::shared_ptr<VectorInitialCondition>& ic_fnc) : m_lob(lob)
-  {
-    m_ic_vector = ic_fnc;
-    m_is_vector = true;
+    m_ic = ic_fnc;
     m_is_computed = false;
   }
 
   //! Dtor
-  virtual ~InitialSolution() {}
+  virtual ~InitialSolution() = default;
   
   //! \brief evaluate values 
   virtual void evaluate() = 0;
   
-  //! \brief get evaluated field
-  virtual std::shared_ptr<std::vector<MDArray>>
+  virtual std::shared_ptr<FEVector>
   get_evaluatedField() const;
 
-  virtual std::shared_ptr<FEVector>
-  get_evaluatedFieldGlobal() const;
-
-  /** \brief Fixed consistent mass matrix for explicit steppers */
-  std::shared_ptr<FEMatrix>
-  getConsistentMassMatrix() const;
-
-  /** \brief Fixed lumped mass matrix for explicit steppers */
-  std::shared_ptr<FEVector>
-  getLumpedMassMatrix() const;
-  
   /** \brief gets the app linear obj builder which is m_lob by default */
   virtual inline
   std::shared_ptr<LinearObjectBuilder>
   getAppLOB() const
   { return m_lob; }
 
-  void buildConsistentMassMatrix()
-  { throw std::runtime_error("Consistent mass matrix builder not implemented."); }
-
 protected:
 
   // initial cond function (scalar)
-  std::shared_ptr<ScalarInitialCondition> m_ic_scalar;
-  // initial cond function (vector)
-  std::shared_ptr<VectorInitialCondition> m_ic_vector;
-  // flag for vec or scalar
-  bool m_is_vector = false;
-
-  
+  std::shared_ptr<ScalarInitialCondition> m_ic;
   // the linear object builder
-  std::shared_ptr<LinearObjectBuilder>  m_lob;
+  std::shared_ptr<LinearObjectBuilder> m_lob;
   // true if initial solution is computed successfully
-  mutable bool                          m_is_computed;
-  // the initial solution as a gathered vector (comp x (cells * local_ndofs))
-  std::shared_ptr<std::vector<MDArray>> m_result_gathered;
+  mutable bool m_is_computed;
   // the initial solution as a distributed vector
-  std::shared_ptr<FEVector>             m_result;
-  // flag for consistent mass matrix
-  bool                                  m_mass_matrix_built = false;
-  // consistent mass matrix
-  std::shared_ptr<FEMatrix>             m_mass;
+  std::shared_ptr<FEVector> m_result;
   // flag for lumped mass matrix
-  bool                                  m_lumped_mass_matrix = false;
-  // lumped mass matrix
-  mutable std::shared_ptr<FEVector>     m_lumped_mass;
+  bool m_lumped_mass_matrix_built = false;
+  // flag for consistent mass matrix
+  bool m_mass_matrix_built = false;
   
 };
 
+/**
+ * \brief nodal projection on nodal Dofs on a mesh i.e. mesh node is dof node
+ */
+class NodalProjection
+  :
+  public InitialSolution
+{
+public:
 
+  NodalProjection(const std::shared_ptr<LinearObjectBuilder>& lob,
+                  const std::shared_ptr<ScalarInitialCondition>& ic_fnc) : InitialSolution(lob,ic_fnc)
+  {
+    m_result = std::make_shared<FEVector>(m_lob->dofMapper()->mesh()->numOfPoints());
+  }
 
+  void evaluate() override;
+  
+};
 
+class ConsistentMassProjection
+  :
+  public InitialSolution
+{
+public:
 
+  ConsistentMassProjection(const std::shared_ptr<LinearObjectBuilder>& lob,
+                           const std::shared_ptr<ScalarInitialCondition>& ic_fnc,
+                           const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& fe_basis,
+                           const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature);
+
+  void evaluate() override;
+
+private:
+
+  // consistent mass matrix
+  std::shared_ptr<FEMatrix> m_mass;
+  // FE Basis
+  std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>> m_basis;
+  // Quadrature Rule
+  std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
+
+};
+
+class LumpedMassProjection
+  :
+  public InitialSolution
+{
+public:
+
+  LumpedMassProjection(const std::shared_ptr<LinearObjectBuilder>& lob,
+                       const std::shared_ptr<ScalarInitialCondition>& ic_fnc,
+                       const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& fe_basis,
+                       const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature);
+
+  void evaluate() override;
+
+private:
+
+  // lumped mass matrix
+  std::shared_ptr<FEVector> m_lumped_mass;
+  // FE Basis
+  std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>> m_basis;
+  // Quadrature Rule
+  std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
+
+};
 
 }
-// end namespace valiant
+// end namespace hydrofem
 
-#endif /** __Valiant_InitialSolution_HPP__ */
+#endif /** __Hydrofem_InitialSolution_HPP__ */

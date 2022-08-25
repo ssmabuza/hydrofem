@@ -30,6 +30,7 @@ public:
     Optionable(option_handler)
   {
     m_option_handler = option_handler;
+    option_handler->parse();
   }
   
   /** \brief Dtor */
@@ -44,7 +45,7 @@ public:
 protected:
   
   /** \brief options to be parsed for solver */
-  void addOptionsCallback(po::options_description &config) override
+  void addOptionsCallback(po::options_description &/*config*/) override
   {
     // nothing to parse
   }

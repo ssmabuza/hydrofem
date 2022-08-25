@@ -57,9 +57,9 @@ void BC_Bioseparation::initialize()
   
   // update index in system for each side/boundary type
   int index = 0;
-  for (auto it = m_bc_info_edges.begin(); it != m_bc_info_edges.end(); ++it)
+  for (auto it = startBCEdges(); it != endBCEdges(); ++it)
   {
-    if (it->second->m_boundary_condition_type == typeGammaMinus)
+    if (isGammaMinus(it))
     {
       it->second->m_index_in_system = index;
       ++index;
@@ -86,7 +86,7 @@ void BC_Bioseparation::initialize()
     }
   }
 
-    index = 0;
+  index = 0;
   for (auto it = startBCEdges(); it != endBCEdges(); ++it)
   {
     if (isSigma(it))

@@ -12,8 +12,7 @@
 #include "Hydrofem_Mesh.hpp"
 
 #include "Hydrofem_BC_Scalar.hpp"
-#include "Hydrofem_BC_ReactiveFlow.hpp"
-#include "Hydrofem_BC_EulerEquations.hpp"
+#include "Hydrofem_BC_Bioseparation.hpp"
 
 namespace hydrofem 
 {
@@ -24,21 +23,11 @@ std::shared_ptr<BC> BCFactory::build()
   
   if (m_bc_name == "bc-scalar")
   {
-    
     bc = std::make_shared<BC_Scalar>(m_mesh);
-    
-  } else if (m_bc_name == "bc-euler-equations") {
-    
-    bc = std::make_shared<BC_EulerEquations>(m_mesh);
-    
-  } else if (m_bc_name == "bc-reactive-flow") {
-    
-    bc = std::make_shared<BC_ReactiveFlow>(m_mesh);
-    
+  } else if (m_bc_name == "bc-bioseparation") {
+    bc = std::make_shared<BC_Bioseparation>(m_mesh);
   } else {
-    
     throw std::logic_error("Error in BCFactory::buildBC(), no valid BC chosen.");
-    
   }
     
   assert(bc);
@@ -46,7 +35,5 @@ std::shared_ptr<BC> BCFactory::build()
   
 }
 
-  
-  
 }
-// end namespace valiant
+// end namespace hydrofem

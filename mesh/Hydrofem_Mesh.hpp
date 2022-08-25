@@ -25,9 +25,11 @@ namespace hydrofem
  * \brief A base class for meshes used throughout the code.
  * 
  */
-class Mesh
+class Mesh : std::enable_shared_from_this<Mesh>
 {
 public:
+
+  using Ptr = std::shared_ptr<Mesh>;
   
   //! \brief the mesh information container for a regular polygonal domain and regular uniform meshes
   using mesh_info_type = std::tuple<std::size_t,std::vector<double>,std::vector<std::size_t>,MeshType,TriangulationType>;
