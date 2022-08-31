@@ -36,7 +36,8 @@ ProblemFactory::build() const
   else {
     throw std::logic_error("Error in ProblemFactory::build(), invalid problem name provided.");
   }
-  problem->init();
+  if (m_initialize_problem)
+    problem->init();
   return problem;
 }
 

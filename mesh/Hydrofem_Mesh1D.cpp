@@ -47,7 +47,7 @@ void Mesh1D::generateUniformMesh(const int nx, const double L_l, const double L_
   
   _points.clear();
   const double delta_x = (L_r-L_l)/nx;
-  for (std::size_t node_ind = 0; node_ind < nx+1; ++node_ind)
+  for (int node_ind = 0; node_ind < nx+1; ++node_ind)
     _points.push_back(SPoint(L_l+delta_x*node_ind));
   
   _elems.clear();

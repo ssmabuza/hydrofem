@@ -27,7 +27,7 @@ public:
     Optionable(option_handler)
   {
     m_option_handler = option_handler;
-    m_option_handler->parse();
+    option_handler->parse();
   }
   
   /** @brief Dtor */
@@ -35,6 +35,10 @@ public:
   
   /** @brief The mesh builder routine */
   std::shared_ptr<Mesh> buildMesh() const;
+
+  /** \brief Flag for writing to MATLAB */
+  bool writeOutputToMATLAB() const 
+  { return m_write_to_matlab; }
   
 private:
 

@@ -42,6 +42,8 @@ void Driver_TransientSingleEquationSet::setup()
   // form the problem mesh
   MeshFactory mesh_factory(m_option_handler);
   m_mesh = mesh_factory.buildMesh();
+  // check if soln is to be written in MATLAB
+  m_write_solution_matlab = mesh_factory.writeOutputToMATLAB();
   // form the DOF manager
   DofMapperFactory dofmapper_factory(m_option_handler);
   m_dofmapper = dofmapper_factory.buildDofMapper(m_mesh);

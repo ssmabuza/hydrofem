@@ -10,12 +10,14 @@
 #ifndef __Hydrofem_Problem_Poisson_HPP__
 #define __Hydrofem_Problem_Poisson_HPP__
 
-#include "Hydrofem_BC.hpp"
+#include "Hydrofem_BC_Scalar.hpp"
 #include "Hydrofem_Problem.hpp"
 #include "Hydrofem_InitialCondition.hpp"
 
 namespace hydrofem
 {
+
+class BC_Scalar;
 
 class Problem_Poisson
   :

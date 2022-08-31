@@ -48,6 +48,9 @@ public:
   
   void setDofNames(const std::vector<std::string>& dof_names)
   { m_dof_names = dof_names; }
+
+  virtual void setBoundaryCondition(const std::shared_ptr<BC>& /* bc */)
+  {  }
   //@}
   
   [[nodiscard]] virtual std::shared_ptr<BC> getBoundaryCondition() const
@@ -68,6 +71,8 @@ protected:
   std::string m_name;
   // field names
   std::vector<std::string> m_dof_names;
+  // flag for initialization
+  bool m_is_initialized = false;
   
 };
 

@@ -28,7 +28,7 @@ public:
     Optionable(option_handler),
     m_option_handler(option_handler)
   {
-    
+    option_handler->parse();
   }
   
   virtual ~DriverFactory() {}

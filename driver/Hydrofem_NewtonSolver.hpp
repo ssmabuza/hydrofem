@@ -34,6 +34,7 @@ public:
     // get nonlinear problem
     m_nlp = nlp;
     option_handler->parse();
+    m_lob = m_nlp->lob();
   }
   
   /**  \brief  */

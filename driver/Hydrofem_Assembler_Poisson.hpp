@@ -64,23 +64,24 @@ public:
 private:
   
   /** \brief  */
-  [[maybe_unused]] void
+  static void
   buildStiffMatrix(const std::shared_ptr<FEMatrix>& stiff,
                    const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
                    const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature,
-                   const std::shared_ptr<const DofMapper>& dofmapper) const;
+                   const std::shared_ptr<const DofMapper>& dofmapper);
   
   /** \brief  */
-  void buildRHSVector(const std::shared_ptr<FEVector>& rhs,
-                      const std::shared_ptr<ScalarAnalyticalExpression>& f,
-                      const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
-                      const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature,
-                      const std::shared_ptr<const DofMapper>& dofmapper) const;
+  static void 
+  buildRHSVector(const std::shared_ptr<FEVector>& rhs,
+                 const std::shared_ptr<ScalarAnalyticalExpression>& f,
+                 const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
+                 const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature,
+                 const std::shared_ptr<const DofMapper>& dofmapper);
   
   /** \brief  */
   void applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
                         const std::shared_ptr<FEMatrix>& jac_U) const override;
-
+  
   // problem defining the Poisson equation
   std::shared_ptr<Problem> m_problem;
   // mesh from dof manager

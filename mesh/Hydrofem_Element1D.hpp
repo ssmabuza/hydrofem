@@ -66,7 +66,7 @@ public:
   }
   
   //! Copy Ctor
-  Element1D(const Element1D& elem)
+  Element1D(const Element1D& elem) : Element()
   {
     m_element_type = elem.getElementType();
     m_nodes = elem.m_nodes;

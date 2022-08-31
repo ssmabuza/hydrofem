@@ -21,11 +21,9 @@ void MeshFactory::addOptionsCallback(po::options_description &config)
   config.add_options()
     ("ndims",po::value<int>(&m_ndims)->default_value(1),"Number of dimensions")
     ("input",po::value<std::string>(&m_input)->default_value("Inline"),"Mesh source")
-    ("element_type",po::value<std::string>(&m_elem_type)->default_value("Line"),"Mesh element type")
-    ("triangulation",po::value<std::string>(&m_triangulation)->default_value("Generic"),
-     "Triangular mesh style")
-    ("writeToMATLAB",po::value<bool>(&m_write_to_matlab)->default_value(false),
-     "Write mesh to MATLAB trimesh format")
+    ("element-type",po::value<std::string>(&m_elem_type)->default_value("Line"),"Mesh element type")
+    ("triangulation",po::value<std::string>(&m_triangulation)->default_value("Generic"),"Triangular mesh style")
+    ("write-output-matlab",po::value<bool>(&m_write_to_matlab)->default_value(false),"Write mesh to MATLAB trimesh format")
     ("x0",po::value<double>(&m_x0)->default_value(0.0),"Left value for x.")
     ("xf",po::value<double>(&m_xf)->default_value(1.0),"Right value for x.")
     ("y0",po::value<double>(&m_y0)->default_value(0.0),"Left value for y.")
@@ -35,7 +33,7 @@ void MeshFactory::addOptionsCallback(po::options_description &config)
     ("nx",po::value<int>(&m_nx)->default_value(-10),"Number of cells in the x direction.")
     ("ny",po::value<int>(&m_ny)->default_value(-10),"Number of cells in the y direction.")
     ("nz",po::value<int>(&m_nz)->default_value(-10),"Number of cells in the z direction.")
-    ("file_name",po::value<std::string>(&m_filename)->default_value("mesh.am_fmt"),"Mesh file name");
+    ("mesh-file-name",po::value<std::string>(&m_filename)->default_value("mesh.am_fmt"),"Mesh file name");
 }
 
 std::shared_ptr<Mesh>

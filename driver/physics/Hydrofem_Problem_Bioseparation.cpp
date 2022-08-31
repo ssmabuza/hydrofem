@@ -46,16 +46,20 @@ public:
 
 void Problem_Bioseparation::init()
 {
+  if (m_is_initialized) return;
   m_ic = std::make_shared<ConstantScalarInitialCondition>(0.0);
   m_u_in = std::make_shared<BoundaryExpr>();
   auto _bc = std::make_shared<BC_Bioseparation>(); // TODO: set the mesh
   const double pi = M_PI;
   const double fr = m_flowrate;
   const double width = m_xf - m_x0;
+  
   std::function<SPoint(SPoint)> vel = [&pi,&fr,&width](SPoint x)->SPoint
   { return SPoint(0.0,3*fr/(4*pi*std::pow(width/2.0,3))*(width-x.x())*x.x()); };
+  
   _bc->setFluidVelocity(std::make_shared<std::function<SPoint(SPoint)>>(vel));
   m_bc = _bc;
+  m_is_initialized = true;
 }
 
 void Problem_Bioseparation::addOptionsCallback(po::options_description &config)

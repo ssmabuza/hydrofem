@@ -41,14 +41,16 @@ private:
   {
     // nothing to parse
     config.add_options()
-      ("problem-name",po::value<std::string>(&m_problem_name)->default_value("poisson"),
-       "Continuous problem name.");
+      ("problem-name",po::value<std::string>(&m_problem_name)->default_value("poisson"),"Continuous problem name.")
+      ("problem-initialize",po::value<bool>(&m_initialize_problem)->default_value(false),"Initialize the problem.");
   }
   
   std::string m_problem_name;
   
   std::shared_ptr<OptionHandler> m_option_handler;
   
+  bool m_initialize_problem;
+
 };
 
 }

@@ -1,0 +1,12 @@
+
+To run the code:
+
+1) You first need to go to the build directory or create a new directory: e.g. mydata
+2) In your directory of choice created in 1), place the 'poisson.config' script.
+3) Run: /path/to/hydrofem --config=poisson.config
+
+Note the /path/to/hydrofem is the full path to your executable 'hydrofem' which will be in the build directory.
+
+You may do 'export HYDROFEM=/path/to/hydrofem' in the terminal to avoid using the full path all the time. The you may run the code using
+
+$HYDROFEM --config=poisson.config

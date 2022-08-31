@@ -34,6 +34,8 @@
 
 #include "Hydrofem_ProblemFactory.hpp"
 
+#include "Hydrofem_BC_Scalar.hpp"
+
 namespace hydrofem 
 {
 
@@ -42,6 +44,7 @@ void Driver_SteadySingleEquationSet::setup()
   // form the problem mesh 
   MeshFactory mesh_factory(m_option_handler);
   m_mesh = mesh_factory.buildMesh();
+  m_write_solution_matlab = mesh_factory.writeOutputToMATLAB();
   // form the DOF manager
   DofMapperFactory dofmapper_factory(m_option_handler);
   m_dofmapper = dofmapper_factory.buildDofMapper(m_mesh);
@@ -51,13 +54,22 @@ void Driver_SteadySingleEquationSet::setup()
   // form the numerical quadrature
   m_quadrature = std::make_shared<std::vector<std::shared_ptr<Quadrature>>>(m_mesh->numOfElements());
   for (int elemInd = 0; elemInd < m_mesh->numOfElements(); ++elemInd)
-    m_quadrature->at(elemInd) = std::make_shared<Quadrature_Tri>(m_dofmapper->p()*2,m_mesh->getElementVertices(elemInd));
+    m_quadrature->at(elemInd) = std::make_shared<Quadrature_Tri>(m_dofmapper->p(),m_mesh->getElementVertices(elemInd));
   
   m_gather = std::make_shared<GlobalGather>(m_dofmapper);
   
   // build the physical/continuous problem from the factory
   auto prob_factory = std::make_shared<ProblemFactory>(m_option_handler);
+  // build problem without initalization
   m_problem = prob_factory->build();
+  auto bc = std::make_shared<BC_Scalar>(m_mesh);
+  bc->initializeBoundaryPointsToDirichletEverywhere();
+  m_problem->setBoundaryCondition(bc);
+
+  // set the mesh in the problem's BC
+  // m_problem->getBoundaryCondition()->setMesh(m_mesh);
+  // initialize the problem
+  m_problem->init();
   
   // create IO
   if (m_write_solution_vtk)
@@ -72,6 +84,7 @@ void Driver_SteadySingleEquationSet::setup()
   auto assembler_factory = std::make_shared<AssemblerFactory>(m_option_handler,m_problem,m_dofmapper,m_basis,m_quadrature);
   m_discrete_problem_assembler = assembler_factory->build();
   m_solver = std::make_shared<NewtonSolver>(m_option_handler,m_discrete_problem_assembler);
+  m_solver->initialize();
   m_U = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U->setZero();
   m_U_exact = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U_exact->setZero();
   m_U_gather = std::make_shared<FEArray<double>::CellBasis>(m_dofmapper->nelements(),m_dofmapper->local_ndof());
