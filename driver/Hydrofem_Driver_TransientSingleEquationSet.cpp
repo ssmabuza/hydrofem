@@ -60,7 +60,10 @@ void Driver_TransientSingleEquationSet::setup()
   // build the physical/continuous problem from the factory
   auto prob_factory = std::make_shared<ProblemFactory>(m_option_handler);
   m_problem = prob_factory->build();
-  m_problem->getBoundaryCondition()->setMesh(m_mesh);
+  m_problem->init();
+  // finish building the boundary conditions
+  auto bc = m_problem->getBoundaryCondition();
+  bc->setMesh(m_mesh); bc->initialize();
 
   // create IO
   if (m_write_solution_vtk)
@@ -75,8 +78,10 @@ void Driver_TransientSingleEquationSet::setup()
   auto assembler_factory = std::make_shared<AssemblerFactory>(m_option_handler,m_problem,m_dofmapper,m_basis,m_quadrature);
   m_discrete_problem_assembler = assembler_factory->build();
   auto lob = std::make_shared<LinearObjectBuilder>(m_dofmapper);
-  auto ic = std::make_shared<NodalProjection>(lob,m_problem->getInitialConditionFunction());
+  auto ic = std::make_shared<NodalProjection>(lob,m_problem->getInitialConditionFunction()); ic->evaluate();
+  m_U = ic->get_evaluatedField();
   m_stepper = std::make_shared<Stepper_Theta>(ic,m_discrete_problem_assembler,m_option_handler);
+  m_final_time = m_stepper->tf();
   //m_solver = std::make_shared<NewtonSolver>(m_discrete_problem_assembler,m_option_handler);
   m_U = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U->setZero();
   m_U_exact = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U_exact->setZero();
@@ -93,15 +98,22 @@ void Driver_TransientSingleEquationSet::setup()
 void Driver_TransientSingleEquationSet::solve()
 {
   // initial time
-  double time = m_stepper->time();
+  double time = m_stepper->t0();
+  // save initial solution
+  if (m_write_solution_matlab)
+    Simple_IO<FEVector>::writeData(false,m_U->size(),m_problem->dofNames().at(0) + ".mat",*m_U);
   while (time < m_final_time)
   {
+    // std::cout << "Soln locn \n: " << m_U << std::endl;
+    // std::cout << "Soln vals \n: " << *m_U << std::endl;
+
     // solve the problem
     m_stepper->solveStep();
     // get the current time
     time = m_stepper->time();
+    std::cout << "In time step " << time << std::endl;
     //
-    m_U = m_stepper->getCurrentSolution();
+    *m_U = *(m_stepper->getCurrentSolution());
 //     // get the solution
 //     m_gather->doGather(*m_U_gather,m_U);
 //     // write the solution to file in paraview
@@ -109,7 +121,7 @@ void Driver_TransientSingleEquationSet::solve()
 //         m_io->writeSolutionTofile(*m_U_gather,0.0);
     // write the solution to MATLAB
     if (m_write_solution_matlab)
-        Simple_IO<FEVector>::writeData(false,m_U->size(),m_problem->dofNames().at(0) + ".mat",*m_U);
+        Simple_IO<FEVector>::writeData(true,m_U->size(),m_problem->dofNames().at(0) + ".mat",*m_U);
     // compute error
     if (m_compute_convergence_errors && m_problem->getExactSolution())
     {

@@ -133,7 +133,24 @@ public:
   
   bool isSigma(BCConstIt it) const
   { return (it->second->m_boundary_condition_type == typeSigma); }
+
+  bool isDirichletEdge(int i) const
+  { return (m_bc_info_edges.at(i)->m_boundary_condition_type == typeDirichlet); }
   
+  bool isGammaPlusEdge(int i) const
+  { return (m_bc_info_edges.at(i)->m_boundary_condition_type == typeGammaPlus); }
+
+  bool isGammaMinusEdge(int i) const
+  { return (m_bc_info_edges.at(i)->m_boundary_condition_type == typeGammaMinus); }
+  
+  bool isGammaZeroEdge(int i) const
+  { return (m_bc_info_edges.at(i)->m_boundary_condition_type == typeGammaZero); }
+  
+  bool isSigmaEdge(int i) const
+  { return (m_bc_info_edges.at(i)->m_boundary_condition_type == typeSigma); }
+
+
+
 protected:
   
   void initialize() override;

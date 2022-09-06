@@ -42,6 +42,9 @@ public:
   
   /**  \brief  */
   void initialize();
+
+  /** \brief */
+  void finalize(int,double,bool);
   
   /**  \brief  */
   void solve(const std::shared_ptr<FEVector>& U_result,
@@ -50,7 +53,16 @@ public:
   /**  \brief  */
   double solveStep(const std::shared_ptr<FEVector>& U_result,
                    const std::shared_ptr<const FEVector>& U_guess) const;
-  
+
+  /**  \brief  */
+  double solveStep(const std::shared_ptr<FEVector>& U_result,
+                   const std::shared_ptr<const FEVector>& dot_U_guess,
+                   const std::shared_ptr<const FEVector>& U_guess) const;
+
+  inline void set_dt(double dt) { m_delta_t = dt; }
+  inline void set_time(double time) { m_time = time; }         
+  inline void set_beta(double beta) { m_beta = beta; }
+
 private: 
   
   /** \brief options to be parsed for solver */
@@ -84,7 +96,13 @@ private:
   bool                                   m_initialized;
   //! 
   std::string                            m_linear_solver_name;
-  
+  //! for transient problems
+  double                                 m_delta_t = NAN;
+  //! time 
+  double                                 m_time = NAN;
+  //! beta 
+  double                                 m_beta = NAN;
+
 };
 
 }

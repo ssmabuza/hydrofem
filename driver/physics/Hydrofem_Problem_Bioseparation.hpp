@@ -33,6 +33,7 @@ public:
     setName("bioseparation");
     setDofNames({{"conc"}});
     option_handler->parse();
+    m_is_initialized = false;
   }
 
   ~Problem_Bioseparation() override = default;

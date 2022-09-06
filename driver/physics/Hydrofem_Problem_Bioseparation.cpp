@@ -28,19 +28,19 @@ public:
 
   //! \brief can be used for exact solution/ boundary values
   virtual double evaluate(const SPoint& x)
-  { assert(!m_is_transient); return boundaryFunction(x.x(),x.y()); }
+  { return boundaryFunction(x.x(),x.y()); }
 
   //! \brief can be used for exact solution/ boundary values
   virtual double evaluate(const SPoint& x, const double /*t*/)
-  { assert(m_is_transient); return boundaryFunction(x.x(),x.y()); }
+  { return boundaryFunction(x.x(),x.y()); }
 
   //! \brief make this a functor
   virtual double operator()(const SPoint& x)
-  { assert(!m_is_transient); return boundaryFunction(x.x(),x.y()); }
+  { return boundaryFunction(x.x(),x.y()); }
 
   //! \brief make this a functor
   virtual double operator()(const SPoint& x, const double /*t*/)
-  { assert(m_is_transient); return boundaryFunction(x.x(),x.y()); }
+  { return boundaryFunction(x.x(),x.y()); }
 
 };
 
@@ -54,10 +54,10 @@ void Problem_Bioseparation::init()
   const double fr = m_flowrate;
   const double width = m_xf - m_x0;
   
-  std::function<SPoint(SPoint)> vel = [&pi,&fr,&width](SPoint x)->SPoint
+  std::function<SPoint(SPoint)> vel = [=](SPoint x)->SPoint
   { return SPoint(0.0,3*fr/(4*pi*std::pow(width/2.0,3))*(width-x.x())*x.x()); };
   
-  _bc->setFluidVelocity(std::make_shared<std::function<SPoint(SPoint)>>(vel));
+  _bc->setFluidVelocity(vel);
   m_bc = _bc;
   m_is_initialized = true;
 }

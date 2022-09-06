@@ -45,6 +45,7 @@ public:
     Driver(option_handler)
   {
     option_handler->parse();
+    m_option_handler = option_handler;
   }
 
   /** \brief Dtor */
@@ -70,8 +71,10 @@ protected:
   std::shared_ptr<DofMapper> m_dofmapper;
   // basis functions
   std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>> m_basis;
-  // quadrature rule
+  // quadrature rule (domain)
   std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
+  // quadrature rule (boundary)
+  std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature_bdry;
   // IO object
   std::shared_ptr<IOBase> m_io;
   // solution
@@ -97,10 +100,8 @@ protected:
   {
     config.add_options()
       ("xml-out",po::value<bool>(&m_xml)->default_value(false),"Write in XML format for VTK")
-      ("final-time",po::value<double>(&m_final_time)->required(),"Final time for the simulation")
       ("compute-convergence-errors",po::value<bool>(&m_compute_convergence_errors)->default_value(false),"Compute convergence error")
-      // ("write-solution-matlab",po::value<bool>(&m_write_solution_matlab)->default_value(false),"Write the solution for output in MATLAB")
-      ("write-solution-vtk",po::value<bool>(&m_write_solution_vtk)->default_value(true),"Write the solution for output in ParaView");
+      ("write-output-vtk",po::value<bool>(&m_write_solution_vtk)->default_value(true),"Write the solution for output in ParaView");
   }
 
   // the system input from bash file or command line

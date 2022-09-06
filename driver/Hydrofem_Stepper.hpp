@@ -17,7 +17,7 @@ namespace hydrofem
 {
 
 /**
- * @brief A base time stepper class
+ * \brief A base time stepper class
  */
 class Stepper
   :
@@ -25,30 +25,44 @@ class Stepper
 {
 public:
   
-  //! @brief Ctor
-  explicit Stepper(const std::shared_ptr<OptionHandler>& option_handler)
+  //! \brief Ctor
+  explicit Stepper(const std::shared_ptr<OptionHandler>& option_handler) : Optionable(option_handler)
   {
+    option_handler->parse();
     m_option_handler = option_handler;
   }
 
-  //! @brief Dtor
+  //! \brief Dtor
   virtual ~Stepper() = default;
   
-  //! @brief solve one time step
+  //! \brief solve one time step
   virtual void solveStep() = 0;
   
-  //! @brief get current time (helps when doing adaptive time stepping)
+  //! \brief get current time (helps when doing adaptive time stepping)
   [[nodiscard]] virtual double time() const = 0;
-  
+
+  //! \brief current time step size
+  [[nodiscard]] virtual double dt() const = 0;
+
+  //! \brief initial time
+  [[nodiscard]] virtual double t0() const = 0;
+
+  //! \brief final time
+  [[nodiscard]] virtual double tf() const = 0;
+
   //! @brief get the current solution (for printing to file)
   [[nodiscard]] virtual std::shared_ptr<FEVector> getCurrentSolution() const = 0;
   
 protected:
 
+  virtual void addOptionsCallback(po::options_description & /*config*/) { }
+
+  //! \brief routine for computing delta t from CFL
+  [[maybe_unused]] virtual void computeDeltaT() const {}
+
   // the system input from bash file or command line
   std::shared_ptr<OptionHandler> m_option_handler;
   
-
 };
 
 }

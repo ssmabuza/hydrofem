@@ -48,7 +48,36 @@ solveStep(const std::shared_ptr<FEVector>& U_result,
 {
   assert(m_initialized);
   // compute the residual
-  m_nlp->buildResidualAndJacobian(U_guess,m_residual,m_jac,0.0);
+  m_nlp->buildResidualAndJacobian(U_guess,m_residual,m_jac,m_beta);
+  m_nlp->finalizeAssembly(m_residual,m_jac);
+  // get the norm of the residual
+  const auto res = m_residual->norm();
+  // check if residual norm is not usual
+  if (std::isnan(res) || std::isinf(res))
+  {
+    std::stringstream ss;
+    ss << "Error in NewtonSolver::solveInitialStep!!! residual norm is " << res << ", aborting!!";
+    throw std::runtime_error(ss.str());
+  }
+  *m_residual *= -1.0;
+  // get the first initial solution
+  m_delta_u->setZero();
+  // solve the system 
+  m_linear_solver->solve(m_jac,m_residual,m_delta_u);
+  // get the new solution
+  *U_result = *m_delta_u + *U_guess;
+  // return the residual 
+  return res;
+}
+
+double NewtonSolver::
+solveStep(const std::shared_ptr<FEVector>& U_result,
+          const std::shared_ptr<const FEVector>& dot_U_guess,
+          const std::shared_ptr<const FEVector>& U_guess) const
+{
+  assert(m_initialized);
+  // compute the residual
+  m_nlp->buildResidualAndJacobian(U_guess,dot_U_guess,m_residual,m_jac,m_time,m_delta_t,m_beta);
   m_nlp->finalizeAssembly(m_residual,m_jac);
   // get the norm of the residual
   const auto res = m_residual->norm();
@@ -101,6 +130,20 @@ void NewtonSolver::initialize()
   m_linear_solver = std::make_shared<LinearSolverInterface>(m_linear_solver_name);
   // set initialized to true
   m_initialized = true;
+}
+
+void NewtonSolver::finalize(int m, double res, bool convd)
+{
+  if (convd)
+    converged_statement(m,res);
+  else {
+    std::cout << std::endl;
+    std::cout << "************  Fixed point iteration did not converge  *********** "<< std::endl;
+    std::cout << "Fixed point iteration number of iterations = " << m << std::endl;
+    std::cout << "Fixed point iteration residual norm        = " << res << std::endl;
+    std::cout << "***************************************************************** "<< std::endl;
+    std::cout << std::endl;
+  }
 }
 
 }

@@ -34,12 +34,14 @@ public:
                 const std::shared_ptr<Assembler_Base>& assembler,
                 const std::shared_ptr<OptionHandler>& option_handler) : Stepper(option_handler)
   {
+    // parse the options
+    option_handler->parse();
     // get initial condition
     m_ic = ic;
     // get linear object builder 
     const auto lob = m_ic->getAppLOB();
     // build solution and residual vectors
-    m_u_new = lob->createVector(); m_u_new->setZero();
+    m_u_new = m_ic->get_evaluatedField(); //lob->createVector(); m_u_new->setZero();
     m_u_old = lob->createVector(); m_u_old->setZero();
     m_delta_u = lob->createVector(); m_delta_u->setZero();
     m_u_dot = lob->createVector(); m_u_dot->setZero();
@@ -53,6 +55,7 @@ public:
     m_assembler = assembler;
     // build the nonlinear solver
     m_nlsolver = std::make_shared<NewtonSolver>(option_handler,m_assembler);
+    m_nlsolver->initialize();
   }
 
   //! Dtor
@@ -62,11 +65,10 @@ public:
   virtual void addOptionsCallback(po::options_description &config)
   {
     config.add_options()
-      ("stepperTheta",po::value<double>(&m_theta)->default_value(0.5),"Value for theta")
-      ("stepperInitialTime",po::value<double>(&m_t0)->default_value(0.0),"Initial time")
-      ("stepperTimeStep",po::value<double>(&m_delta_t)->default_value(NAN),"Write the solution for output in ParaView")
-      ("nonlinearSolverNumIterations",po::value<int>(&m_its)->default_value(5),"Write the solution for output in ParaView")
-      ("nonlinearSolverTolerance",po::value<double>(&m_tol)->default_value(1.0e-7),"Write the solution for output in ParaView");
+      ("stepper-theta",po::value<double>(&m_theta)->default_value(0.5),"Value for theta")
+      ("stepper-t0",po::value<double>(&m_t0)->default_value(0.0),"Initial time")
+      ("stepper-tf",po::value<double>(&m_tf)->default_value(0.0),"Final time")
+      ("stepper-dt",po::value<double>(&m_delta_t)->default_value(NAN),"Time step");
   }
   
   //! \brief solve one step and update solution and time
@@ -80,29 +82,19 @@ public:
   [[nodiscard]] inline std::shared_ptr<FEVector> getCurrentSolution() const override
   { return m_u_new; }
 
-  //! \brief manual alteration of the fixed point iteration
-  inline void setNonlinearSolverParams(const int num_its,
-                                       const double tol,
-                                       const bool inexact)
-  {
-    m_its = num_its;
-    m_tol = tol;
-    m_inexact = inexact;
-  }
+  //! \brief current time step size
+  [[nodiscard]] inline double dt() const override { return m_delta_t; }
 
-  //! \brief sets default nonlinear solver options
-  [[maybe_unused]] inline void
-  setSolverOptions(const int num_its = 5,
-                   const double tol = 1.0e-7,
-                   const bool inexact = true)
-  {
-    setNonlinearSolverParams(num_its,tol,inexact);
-  }
-  
-  //! \brief routine for computing delta t from CFL
-  [[maybe_unused]] void computeDeltaT(double& /*delta_t*/) {}
-  
+  //! \brief initial time
+  [[nodiscard]] inline double t0() const override { return m_t0; }
+
+  //! \brief final time
+  [[nodiscard]] inline double tf() const override { return m_tf; }
+
 private:
+
+  //! \brief routine for computing delta t from CFL
+  [[maybe_unused]] void computeDeltaT() const override {}
   
   //! tool for assembling residual and Jacobian
   std::shared_ptr<Assembler_Base>  m_assembler;
@@ -128,8 +120,10 @@ private:
   double                           m_theta;
   //! initial time
   double                           m_t0;
+  //! final time
+  double                           m_tf;
   //! delta t
-  double                           m_delta_t;
+  mutable double                   m_delta_t;
   //! current time
   double                           m_time;
   //! max number of fixed point its

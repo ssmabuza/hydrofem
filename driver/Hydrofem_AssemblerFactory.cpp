@@ -22,7 +22,7 @@ AssemblerFactory::build() const
   if (m_name == "poisson")
     assembler = std::make_shared<Assembler_Poisson>(m_problem,m_dofmapper,m_basis,m_quadrature);
   else if (m_name == "bioseparation")
-    assembler = std::make_shared<Assembler_Bioseparation>(m_problem,m_dofmapper,m_basis,m_quadrature);
+    assembler = std::make_shared<Assembler_Bioseparation>(m_problem,m_dofmapper,m_basis,m_quadrature,m_afc_enabled);
   assert(assembler);
   return assembler;
 }

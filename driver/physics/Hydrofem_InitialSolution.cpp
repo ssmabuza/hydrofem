@@ -28,6 +28,7 @@ evaluate()
   const auto mesh = m_lob->dofMapper()->mesh();
   for (Eigen::Index i = 0; i < m_result->size(); ++i)
     (*m_result)[i] = m_ic->evaluate(mesh->getPoint(i));
+  m_is_computed = true;
 }
 
 ConsistentMassProjection::
@@ -75,6 +76,7 @@ void ConsistentMassProjection::evaluate()
   LinearSolverInterface lsi("cg");
   // do the projection
   lsi.solve(m_mass,rhs,m_result);
+  m_is_computed = true;
 }
 
 LumpedMassProjection::
@@ -117,7 +119,7 @@ void LumpedMassProjection::evaluate()
       (*rhs)[glob_inds[i]] += val/(*m_lumped_mass)[glob_inds[i]];
     }
   }
-
+  m_is_computed = true;
 }
 
 }

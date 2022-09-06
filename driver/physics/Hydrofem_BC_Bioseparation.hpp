@@ -43,7 +43,7 @@ public:
 
   //! \brief Ctor from \p mesh and \p velocity 
   BC_Bioseparation(const std::shared_ptr<Mesh>& mesh,
-                   const std::shared_ptr<std::function<SPoint(SPoint)>>& velocity)
+                   const std::function<SPoint(SPoint)>& velocity)
     :
     BC_Scalar(mesh)
   {
@@ -52,21 +52,21 @@ public:
   }
   
   //! \brief sets the fluid velocity profile
-  void setFluidVelocity(const std::shared_ptr<std::function<SPoint(SPoint)>>& velocity)
+  void setFluidVelocity(const std::function<SPoint(SPoint)>& velocity)
   { m_velocity = velocity; }
 
   //! \brief gets the fluid velocity profile
-  std::shared_ptr<std::function<SPoint(SPoint)>> getFluidVelocity() const
+  const std::function<SPoint(SPoint)>& getFluidVelocity() const
   { return m_velocity; }
 
   //! \brief Dtor
   virtual ~BC_Bioseparation() {}
   
+  void initialize() override;
+
 private:
   
-  void initialize();
-
-  std::shared_ptr<std::function<SPoint(SPoint)>> m_velocity;  
+  std::function<SPoint(SPoint)> m_velocity;  
   
 };
 

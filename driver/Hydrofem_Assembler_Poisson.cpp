@@ -110,10 +110,12 @@ applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
       }
     }
   }
-  m_dirichlet_applied = true;
-//   std::cout << *m_rhs << std::endl;
-//   std::cout << *jac_U << std::endl;
-
+  
+  if (!m_dirichlet_applied)
+  {
+    jac_U->makeCompressed();
+    m_dirichlet_applied = true;
+  }
 }
 
 }

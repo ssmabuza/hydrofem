@@ -18,8 +18,8 @@ ProblemFactory(const std::shared_ptr<OptionHandler>& option_handler)
   :
   Optionable(option_handler)
 {
-  m_option_handler = option_handler;
   option_handler->parse();
+  m_option_handler = option_handler;
 }
 
 std::shared_ptr<Problem>

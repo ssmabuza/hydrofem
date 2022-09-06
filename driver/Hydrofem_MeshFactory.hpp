@@ -22,11 +22,10 @@ class MeshFactory
 public:
   
   /** @brief Ctor */
-  MeshFactory(const std::shared_ptr<OptionHandler>& option_handler)
+  explicit MeshFactory(const std::shared_ptr<OptionHandler>& option_handler)
     :
     Optionable(option_handler)
   {
-    m_option_handler = option_handler;
     option_handler->parse();
   }
   
@@ -42,9 +41,6 @@ public:
   
 private:
 
-  // the system input from bash file or command line
-  std::shared_ptr<OptionHandler> m_option_handler;
-  
   /** get the valid parameters */
   void addOptionsCallback(po::options_description &config);
   

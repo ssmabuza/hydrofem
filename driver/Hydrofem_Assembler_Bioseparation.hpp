@@ -32,7 +32,7 @@ public:
   Assembler_Bioseparation(const std::shared_ptr<Problem>& problem,
                           const std::shared_ptr<DofMapper>& dofmapper,
                           const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
-                          const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature)
+                          const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature, bool afc_enabled)
   {
     m_problem = problem;
     m_dofmapper = dofmapper;
@@ -41,7 +41,8 @@ public:
     m_mesh = dofmapper->mesh();
     m_problem = problem;
     m_lob = std::make_shared<LOB>(m_dofmapper);
-    m_rhs = m_lob->createVector();
+    m_afc_vec = m_lob->createVector();
+    m_do_afc = afc_enabled;
   }
   
   /** \brief Dtor */
@@ -60,7 +61,7 @@ public:
                         const std::shared_ptr<FEMatrix>& jac_U) const override;
                                 
 private:
-    
+
   // for alternative matrix based implementation
   // struct MatrixBasedImpl
   // {
@@ -119,10 +120,17 @@ private:
   std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>> m_basis;
   // global quadrature
   std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
-  // fixed RHS vector
-  std::shared_ptr<FEVector> m_rhs;
+  // AFC vector
+  std::shared_ptr<FEVector> m_afc_vec;
   // do algebraic flux correction
   bool m_do_afc;
+  // AFC edge graphs
+  // global mass matrix
+  std::shared_ptr<FEMatrix> m_M_mat;
+  // global artificial diffusion matrix
+  std::shared_ptr<FEMatrix> m_D_mat;
+  // flag for once off builds
+  mutable bool m_built_d_mat_graph = false;
   
 };
 

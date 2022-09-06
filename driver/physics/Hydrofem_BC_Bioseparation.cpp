@@ -28,7 +28,7 @@ void BC_Bioseparation::initialize()
         const auto gedge_vertices = m_mesh->getEdgeVertices(gedge_ind);
         const auto edge_centre = 0.5*(gedge_vertices[0]+gedge_vertices[1]);
         const auto normall = m_mesh->evalEdgeNormal(elem_ind,ledge_ind);
-        const double v_dot_n = (*m_velocity)(edge_centre)*normall;
+        const double v_dot_n = m_velocity(edge_centre)*normall;
         
         if (v_dot_n > 0)
           m_bc_info_edges[gedge_ind]->m_boundary_condition_type = typeGammaPlus;
@@ -95,6 +95,7 @@ void BC_Bioseparation::initialize()
       ++index;
     }
   }
+
 }
 
 }

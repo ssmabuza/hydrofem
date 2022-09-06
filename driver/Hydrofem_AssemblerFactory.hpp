@@ -51,9 +51,10 @@ public:
 private:
   
   /** \brief options to be parsed for solver */
-  virtual void addOptionsCallback(po::options_description &config)
+  virtual void addOptionsCallback(po::options_description &config) override
   {
     config.add_options()
+      ("afc-enabled",po::value<bool>(&m_afc_enabled)->default_value(false),"Flag for AFC, goes into assembly.")
       ("assembler",po::value<std::string>(&m_name)->default_value("poisson"),"Assembler name.");
   }
   
@@ -67,7 +68,8 @@ private:
   std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>> m_basis;
   // global quadrature
   std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>> m_quadrature;
-
+  // flag for doing AFC
+  bool m_afc_enabled;
 };
 
 }
