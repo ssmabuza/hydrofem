@@ -47,7 +47,7 @@ solveSystemBiCGSTAB(const std::shared_ptr<const FEMatrix>& A,
                     const std::shared_ptr<FEVector>& sol)
 {
   // create the BiCGSTAB solver object
-  Eigen::BiCGSTAB<FEMatrix, Eigen::IncompleteLUT<double>> solver;
+  Eigen::BiCGSTAB<FEMatrix , Eigen::IncompleteLUT<double>> solver;
   solver.setTolerance(tol);
   solver.setMaxIterations(maxiter);
   solver.compute(*A);

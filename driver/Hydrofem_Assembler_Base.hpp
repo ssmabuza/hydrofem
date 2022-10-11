@@ -48,6 +48,26 @@ public:
                                 const double /*beta*/) const { }
 
   /**
+   * \brief The transient assembly explicit and implicit stepping including explicit RK steppers
+   *
+   * \param U       - current solution
+   * \param U_dot   - current time derivative of solution (finite difference approx)
+   * \param res_U   - residual
+   * \param jac_U   - Jacobian
+   * \param time    - current time
+   * \param delta_t - current time step
+   * \param beta    - system multiplier (which is 1 most of the time)
+   */
+  virtual
+  void buildSteadyResidualAndJacobian(const std::shared_ptr<const FEVector>& /*U*/,
+                                      const std::shared_ptr<const FEVector>& /*U_dot*/,
+                                      const std::shared_ptr<FEVector>& /*res_U*/,
+                                      const std::shared_ptr<FEMatrix>& /*jac_U*/,
+                                      const double /*time*/,
+                                      const double /*delta_t*/,
+                                      const double /*beta*/) const { }
+
+  /**
    * \brief The non-transient assembly (steady solver)
    *
    * \param U     - current solution
@@ -60,6 +80,23 @@ public:
                                 const std::shared_ptr<FEVector>& /*res_U*/,
                                 const std::shared_ptr<FEMatrix>& /*jac_U*/,
                                 const double /*beta*/) const { }
+
+  /**
+   * \brief The non-transient assembly (steady solver)
+   *
+   * \param U     - current solution
+   * \param res_U - residual
+   * \param jac_U - Jacobian
+   * \param beta  - system multiplier
+   */
+  virtual
+  void buildSteadyResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
+                                      const std::shared_ptr<FEVector>& res_U,
+                                      const std::shared_ptr<FEMatrix>& jac_U,
+                                      const double beta) const 
+  {
+    buildResidualAndJacobian(U,res_U,jac_U,beta);
+  }
 
   /**
    * \brief Applies Dirichlet BC to global system

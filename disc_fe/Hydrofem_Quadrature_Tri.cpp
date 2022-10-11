@@ -36,13 +36,13 @@ void Quadrature_Tri::buildQuadrature(const int order, const std::vector<SPoint>&
   // compute the weights and quadrature points
   dunavant_rule(rule,order_,qp_ref,qw);
   // current element coords
-  double tri_[2*3] = {tri[0].x(), tri[0].y(), tri[1].x(), tri[1].y(), tri[2].x(), tri[2].y()};
+  std::vector<double> tri_ = {tri[0].x(), tri[0].y(), tri[1].x(), tri[1].y(), tri[2].x(), tri[2].y()};
   // physical quadrature points
   double* qp = new double[2*order_];
   // get the quadrature points at the current triangle   
-  reference_to_physical_t3(tri_,order_,qp_ref,qp);
+  reference_to_physical_t3(tri_.data(),order_,qp_ref,qp);
   // get the triangle area
-  double area = triangle_area(tri_);
+  double area = triangle_area(tri_.data());
 
   for (int i = 0; i < order_; ++i)
     qw[i] = qw[i]*area;
@@ -54,6 +54,10 @@ void Quadrature_Tri::buildQuadrature(const int order, const std::vector<SPoint>&
     _q_points.push_back(SPoint(qp[2*i+0],qp[2*i+1]));
     _q_weights.push_back(qw[i]);
   }
+
+  delete [] qp;
+  delete [] qw;
+  delete [] qp_ref;
 }
 
 }

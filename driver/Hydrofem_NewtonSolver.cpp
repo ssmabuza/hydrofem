@@ -13,36 +13,39 @@
 namespace hydrofem
 {
 
-void converged_statement(int,double);  
-  
 void NewtonSolver::
 solve(const std::shared_ptr<FEVector>& U_result,
       const std::shared_ptr<const FEVector>& U_guess) const
 {
   assert(m_initialized);
-  double res = solveStep(m_u_new,U_guess);
+  //! current solution
+  std::shared_ptr<FEVector> m_u_new = m_lob->createVector();
+  //! old solution t^n
+  std::shared_ptr<FEVector> m_u_old = m_lob->createVector();
+
+  solveStep(m_u_new,U_guess);
   int m = 0;
-  if (res < m_tol)
+  if (reachedEnd())
   {
     // assign the solution
     *U_result = *m_u_new;
     // print statement
-    converged_statement(m,res);
+    finalize();
     // return
     return;
   }
   
-  while ((res >= m_tol) && (m <= m_its))
+  while (!(reachedEnd()))
   {
     m++;
     *m_u_old = *m_u_new;
-    res = solveStep(m_u_new,m_u_old);
+    solveStep(m_u_new,m_u_old);
   }
   *U_result = *m_u_new;
-  converged_statement(m,res);
+  finalize();
 }
 
-double NewtonSolver::
+void NewtonSolver::
 solveStep(const std::shared_ptr<FEVector>& U_result,
           const std::shared_ptr<const FEVector>& U_guess) const
 {
@@ -51,12 +54,12 @@ solveStep(const std::shared_ptr<FEVector>& U_result,
   m_nlp->buildResidualAndJacobian(U_guess,m_residual,m_jac,m_beta);
   m_nlp->finalizeAssembly(m_residual,m_jac);
   // get the norm of the residual
-  const auto res = m_residual->norm();
+  m_res = m_residual->norm();
   // check if residual norm is not usual
-  if (std::isnan(res) || std::isinf(res))
+  if (std::isnan(m_res) || std::isinf(m_res))
   {
     std::stringstream ss;
-    ss << "Error in NewtonSolver::solveInitialStep!!! residual norm is " << res << ", aborting!!";
+    ss << "Error in NewtonSolver::solveInitialStep!!! residual norm is " << m_res << ", aborting!!";
     throw std::runtime_error(ss.str());
   }
   *m_residual *= -1.0;
@@ -66,26 +69,33 @@ solveStep(const std::shared_ptr<FEVector>& U_result,
   m_linear_solver->solve(m_jac,m_residual,m_delta_u);
   // get the new solution
   *U_result = *m_delta_u + *U_guess;
-  // return the residual 
-  return res;
+  // increment number of iterations
+  ++m_num_its;
 }
 
-double NewtonSolver::
+void NewtonSolver::
 solveStep(const std::shared_ptr<FEVector>& U_result,
           const std::shared_ptr<const FEVector>& dot_U_guess,
           const std::shared_ptr<const FEVector>& U_guess) const
 {
   assert(m_initialized);
+  assert(U_result);
+  assert(dot_U_guess);
+  assert(U_guess);
+  assert(m_nlp);
+  assert(m_delta_u);
+  assert(m_linear_solver);
+
   // compute the residual
   m_nlp->buildResidualAndJacobian(U_guess,dot_U_guess,m_residual,m_jac,m_time,m_delta_t,m_beta);
   m_nlp->finalizeAssembly(m_residual,m_jac);
   // get the norm of the residual
-  const auto res = m_residual->norm();
+  m_res = m_residual->norm();
   // check if residual norm is not usual
-  if (std::isnan(res) || std::isinf(res))
+  if (std::isnan(m_res) || std::isinf(m_res))
   {
     std::stringstream ss;
-    ss << "Error in NewtonSolver::solveInitialStep!!! residual norm is " << res << ", aborting!!";
+    ss << "Error in NewtonSolver::solveInitialStep!!! residual norm is " << m_res << ", aborting!!";
     throw std::runtime_error(ss.str());
   }
   *m_residual *= -1.0;
@@ -95,17 +105,8 @@ solveStep(const std::shared_ptr<FEVector>& U_result,
   m_linear_solver->solve(m_jac,m_residual,m_delta_u);
   // get the new solution
   *U_result = *m_delta_u + *U_guess;
-  // return the residual 
-  return res;
-}
-
-void converged_statement(int m, double res)
-{
-  std::cout << std::endl;
-  std::cout << "************  Fixed point iteration converged  *********** "<< std::endl;
-  std::cout << "Fixed point iteration number of iterations = " << m << std::endl;
-  std::cout << "Fixed point iteration residual norm        = " << res << std::endl;
-  std::cout << std::endl;
+  // increment number of iterations
+  ++m_num_its;
 }
 
 void NewtonSolver::addOptionsCallback(po::options_description &config)
@@ -123,26 +124,36 @@ void NewtonSolver::initialize()
   m_jac = m_lob->createSparseMatrix();
   // build all the other objs
   m_delta_u = m_lob->createVector();
+  // build residual vector
   m_residual = m_lob->createVector();
-  m_u_new = m_lob->createVector();
-  m_u_old = m_lob->createVector();
   // build the linear solver
   m_linear_solver = std::make_shared<LinearSolverInterface>(m_linear_solver_name);
   // set initialized to true
   m_initialized = true;
 }
 
-void NewtonSolver::finalize(int m, double res, bool convd)
+void NewtonSolver::finalize() const
 {
-  if (convd)
-    converged_statement(m,res);
-  else {
+  if (m_converged)
+  {
     std::cout << std::endl;
-    std::cout << "************  Fixed point iteration did not converge  *********** "<< std::endl;
-    std::cout << "Fixed point iteration number of iterations = " << m << std::endl;
-    std::cout << "Fixed point iteration residual norm        = " << res << std::endl;
-    std::cout << "***************************************************************** "<< std::endl;
+    std::cout << "Fixed point iteration converged  *********** "<< std::endl;
+    std::cout << "Fixed point iteration number of iterations = " << m_num_its << std::endl;
+    std::cout << "Fixed point iteration residual norm        = " << m_res << std::endl;
     std::cout << std::endl;
+    std::cout << "=========== END Fixed Point Iteration =========================" << std::endl;
+    
+  } else { 
+    std::cout << "Fixed point iteration did not converge in " << m_its;
+    if (m_inexact)
+    {
+      std::cout << " iterations. Accepting solution!!" << std::endl;
+    } else {
+      std::cout << " iterations. Aborting!!" << std::endl;
+      std::cout << std::endl;
+      std::cout << "=========== END Fixed Point Iteration ========================" << std::endl;
+      exit(1);
+    }
   }
 }
 

@@ -32,7 +32,7 @@
 #include "Hydrofem_AssemblerFactory.hpp"
 
 #include "Hydrofem_ProblemFactory.hpp"
-#include "Hydrofem_Stepper_Theta.hpp"
+#include "Hydrofem_StepperFactory.hpp"
 
 namespace hydrofem
 {
@@ -53,7 +53,7 @@ void Driver_TransientSingleEquationSet::setup()
   // form the numerical quadrature
   m_quadrature = std::make_shared<std::vector<std::shared_ptr<Quadrature>>>(m_mesh->numOfElements());
   for (int elemInd = 0; elemInd < m_mesh->numOfElements(); ++elemInd)
-    m_quadrature->at(elemInd) = std::make_shared<Quadrature_Tri>(m_dofmapper->p()*2,m_mesh->getElementVertices(elemInd));
+    m_quadrature->at(elemInd) = std::make_shared<Quadrature_Tri>(m_dofmapper->p()*3,m_mesh->getElementVertices(elemInd));
 
   m_gather = std::make_shared<GlobalGather>(m_dofmapper);
 
@@ -80,12 +80,13 @@ void Driver_TransientSingleEquationSet::setup()
   auto lob = std::make_shared<LinearObjectBuilder>(m_dofmapper);
   auto ic = std::make_shared<NodalProjection>(lob,m_problem->getInitialConditionFunction()); ic->evaluate();
   m_U = ic->get_evaluatedField();
-  m_stepper = std::make_shared<Stepper_Theta>(ic,m_discrete_problem_assembler,m_option_handler);
+  auto stepper_factory = std::make_shared<StepperFactory>(ic,m_option_handler,m_discrete_problem_assembler);
+  m_stepper = stepper_factory->build();
   m_final_time = m_stepper->tf();
   //m_solver = std::make_shared<NewtonSolver>(m_discrete_problem_assembler,m_option_handler);
-  m_U = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U->setZero();
-  m_U_exact = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U_exact->setZero();
-  m_U_gather = std::make_shared<FEArray<double>::CellBasis>(m_dofmapper->nelements(),m_dofmapper->local_ndof());
+  //m_U = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U->setZero();
+  //m_U_exact = std::make_shared<FEVector>(m_dofmapper->global_ndof()); m_U_exact->setZero();
+  //m_U_gather = std::make_shared<FEArray<double>::CellBasis>(m_dofmapper->nelements(),m_dofmapper->local_ndof());
 }
 
 

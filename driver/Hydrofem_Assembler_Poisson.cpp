@@ -39,7 +39,7 @@ buildStiffMatrix(const std::shared_ptr<FEMatrix>& stiff,
 {
   stiff->setZero();
   const auto& loc_ind = dofmapper->getLocDofIndexes();
-  std::cout << "Glob number of dofs = " << dofmapper->global_ndof() << std::endl;
+  //std::cout << "Glob number of dofs = " << dofmapper->global_ndof() << std::endl;
   auto local_stiff_matrix = createKArray<LMAT_<double>>(dofmapper->local_ndof(),dofmapper->local_ndof());
   std::vector<Eigen::Triplet<double>> tripletList;
   tripletList.reserve(dofmapper->nelements() * dofmapper->local_ndof() * dofmapper->local_ndof());
@@ -99,7 +99,7 @@ applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
         // get point index 
         const auto i = it->first;
         // boundary value = 0 here
-        (*res_U)[i] = (*bc_fnc)(mesh->getPoint(i));
+        (*res_U)[i] = 0.0;
         if (!m_dirichlet_applied)
         {
           // zero out the boundary row

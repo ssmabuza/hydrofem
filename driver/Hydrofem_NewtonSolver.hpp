@@ -44,27 +44,36 @@ public:
   void initialize();
 
   /** \brief */
-  void finalize(int,double,bool);
+  void finalize() const;
   
-  /**  \brief  */
+  /**  \brief Full solve for steady problems  */
   void solve(const std::shared_ptr<FEVector>& U_result,
              const std::shared_ptr<const FEVector>& U_guess) const;
   
   /**  \brief  */
-  double solveStep(const std::shared_ptr<FEVector>& U_result,
-                   const std::shared_ptr<const FEVector>& U_guess) const;
+  void solveStep(const std::shared_ptr<FEVector>& U_result,
+                 const std::shared_ptr<const FEVector>& U_guess) const;
 
   /**  \brief  */
-  double solveStep(const std::shared_ptr<FEVector>& U_result,
-                   const std::shared_ptr<const FEVector>& dot_U_guess,
-                   const std::shared_ptr<const FEVector>& U_guess) const;
+  void solveStep(const std::shared_ptr<FEVector>& U_result,
+                 const std::shared_ptr<const FEVector>& dot_U_guess,
+                 const std::shared_ptr<const FEVector>& U_guess) const;
 
   inline void set_dt(double dt) { m_delta_t = dt; }
-  inline void set_time(double time) { m_time = time; }         
+  inline void set_time(double time) { m_time = time; }
   inline void set_beta(double beta) { m_beta = beta; }
 
-private: 
+  bool reachedEnd() const
+  { 
+    m_converged = (m_res <= m_tol);
+    return ((m_num_its >= m_its) || m_converged); 
+  }
+
+private:
   
+  mutable int m_num_its = 0;
+  mutable double m_res;
+
   /** \brief options to be parsed for solver */
   virtual void addOptionsCallback(po::options_description &config);
   
@@ -82,10 +91,6 @@ private:
   std::shared_ptr<FEMatrix>              m_jac;
   //! total residual
   std::shared_ptr<FEVector>              m_residual;
-  //! current solution
-  std::shared_ptr<FEVector>              m_u_new;
-  //! old solution t^n
-  std::shared_ptr<FEVector>              m_u_old;
   //! max number of fixed point its
   int                                    m_its;
   //! tolerance for fixed point its 
@@ -102,6 +107,8 @@ private:
   double                                 m_time = NAN;
   //! beta 
   double                                 m_beta = NAN;
+  //! converged flag
+  mutable bool m_converged = false;
 
 };
 

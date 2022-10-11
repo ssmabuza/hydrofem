@@ -16,7 +16,18 @@ namespace hydrofem
 {
   
 static
-double boundaryFunction(const double /*x*/, const double /*y*/) { return 1.0; }
+double boundaryFunction(const double /*x*/, const double y)
+{
+  double val = 0.0;
+  if (fabs(y) < point_eps)
+    val = 1.0;
+  return val;
+}
+
+std::function<double(SPoint)> initcondFunction = [](SPoint p)->double 
+{
+  return boundaryFunction(p.x(),p.y());
+};
 
 class BoundaryExpr : public ScalarAnalyticalExpression
 {
@@ -47,7 +58,7 @@ public:
 void Problem_Bioseparation::init()
 {
   if (m_is_initialized) return;
-  m_ic = std::make_shared<ConstantScalarInitialCondition>(0.0);
+  m_ic = std::make_shared<FunctionalScalarInitialCondition>(initcondFunction);
   m_u_in = std::make_shared<BoundaryExpr>();
   auto _bc = std::make_shared<BC_Bioseparation>(); // TODO: set the mesh
   const double pi = M_PI;
@@ -55,7 +66,7 @@ void Problem_Bioseparation::init()
   const double width = m_xf - m_x0;
   
   std::function<SPoint(SPoint)> vel = [=](SPoint x)->SPoint
-  { return SPoint(0.0,3*fr/(4*pi*std::pow(width/2.0,3))*(width-x.x())*x.x()); };
+  { return SPoint(0.0,-3*fr*(x.x() - width)*x.x()/(4*pi*std::pow(width/2.0,3))); };
   
   _bc->setFluidVelocity(vel);
   m_bc = _bc;

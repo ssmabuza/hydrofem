@@ -6,70 +6,68 @@
 // ****************************************************************************
 // @HEADER
 
-#include "Hydrofem_Stepper_Theta.hpp"
+#include "Hydrofem_Stepper_ExtrapolatedEuler.hpp"
 
 namespace hydrofem
 {
 
-void Stepper_Theta::solveStep()
+void Stepper_ExtrapolatedEuler::solveStep() 
 {
+  /// step 1: solve backward Euler half step problem
   // update the time
-  m_time += m_delta_t;
+  m_time += m_delta_t/2.0;
   // set initial time
   if (m_stepnum == 0)
   {
     // set time to initial time
     m_time = m_t0;
     // updates solver delta t 
-    m_nlsolver->set_dt(m_delta_t);
+    m_nlsolver->set_dt(m_delta_t/2.0);
     // updates solve time
     m_nlsolver->set_time(m_time);
     // update solver beta
-    m_nlsolver->set_beta(1.0/(m_theta*m_delta_t));
+    m_nlsolver->set_beta(2.0/m_delta_t);
   }
 
   // safe copy of u
   *m_u_old = *m_u_new;
-  // safe copy of u_dot
-  *m_u_dot_old = *m_u_dot;
   // update u_dot
-  (*m_u_dot) = (1.0/(m_theta*m_delta_t))*(*m_u_new)-(1.0/(m_theta*m_delta_t))*(*m_u_old)-((1.0-m_theta)/m_theta)*(*m_u_dot_old);
+  (*m_u_dot) = (2.0/m_delta_t)*(*m_u_half-*m_u_old);
   // solve the problem
-  m_nlsolver->solveStep(m_u_new,m_u_dot_old,m_u_old);
+  m_nlsolver->solveStep(m_u_half,m_u_dot,m_u_old);
   // compute delta t
   computeDeltaT();
-  // residual norm
-  //double res (m_tol+1);
   // updates solver delta t 
-  m_nlsolver->set_dt(m_delta_t);
+  m_nlsolver->set_dt(m_delta_t/2.0);
   // updates solve time
   m_nlsolver->set_time(m_time);
   // update solver beta
-  m_nlsolver->set_beta(1.0/(m_theta*m_delta_t));
+  m_nlsolver->set_beta(2.0/m_delta_t);
   // fixed point iteration
-  int m = 0;
   // force fixed-point iteration to do at least one solve for implicit stepping
   while (!(m_nlsolver->reachedEnd()))
   {
     // solve the problem
-    m_nlsolver->solveStep(m_u_new,m_u_dot,m_u_new);
+    m_nlsolver->solveStep(m_u_half,m_u_dot,m_u_half);
     // compute delta t
     computeDeltaT();
     // update u_dot 
     //TODO: debug, try on the heat equation
-    *m_u_dot = (1.0/(m_theta*m_delta_t))*(*m_u_new) - (1.0/(m_theta*m_delta_t))*(*m_u_old) - ((1.0-m_theta)/m_theta)*(*m_u_dot_old);
-    // increase the fixed point iteration count
-    m++;
+    *m_u_dot = (2.0/m_delta_t)*(*m_u_half-*m_u_old);
   }
   
   // write out the convergence status
   m_nlsolver->finalize();
   // increase time step count  
   m_stepnum++;
-  
+
+  /// step 2: update solution
+  m_time += m_delta_t/2.0;
+  *m_u_new = 2.0 * (*m_u_half) - *m_u_old;
 }
 
 }
 // end namespace hydrofem
 
- 
+
+

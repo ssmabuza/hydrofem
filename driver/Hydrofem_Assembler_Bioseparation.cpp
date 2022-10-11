@@ -41,7 +41,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
 
   // physical problem data from input file or input script
   //@{
-  const auto vel = bc->getFluidVelocity();
+  //const auto vel = bc->getFluidVelocity();
   const auto bc_fnc = problem->getBoundaryFunction();
 
   const double pi     = M_PI;
@@ -66,6 +66,10 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
   d22=omega*d0+alphaL*uavg;
   //@}
 
+  // fluid velocity profile
+  std::function<SPoint(SPoint)> vel = [=](SPoint x)->SPoint
+  { return SPoint(0.0,-3*fr*(x.x() - width)*x.x()/(4*pi*std::pow(width/2.0,3))); };
+
   // compute the limiter first
   if (m_do_afc)
     m_limiter->buildLimiter(m_nodal_limiter,U);
@@ -89,11 +93,11 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     const auto& loc_ind = m_dofmapper->getLocDofIndexes();
     // the global dof indexes in this element
     const auto& glob_ind = m_dofmapper->getGlobDofIndexes(elem_ind);
-
     // add boundary contribution on gamma_plus
     const auto& element = m_mesh->getElement(elem_ind);
     // element vertices
     const auto elem_verts = m_mesh->getElementVertices(elem_ind);
+    
     // local solution vector
     auto U_loc = createKArray<LVEC_<double>>(m_dofmapper->local_ndof());
     // local solution time derivative vector
@@ -106,7 +110,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
       U_loc[loc_ind[i]] = (*U)[glob_ind[i]];
       U_dot_loc[loc_ind[i]] = (*U_dot)[glob_ind[i]];
     }
-
+    
     // local mass matrix
     auto mat_M  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
     // local lumped mass matrix
@@ -125,6 +129,14 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     //auto mat_D  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
     // local jacobian
     auto mat_J  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
+    
+    double area = m_mesh->getElementArea(elem_ind);
+    mat_J(0,0) = 1.0/area;
+    mat_J(1,1) = 1.0/area;
+    mat_J(2,2) = 1.0/area;
+
+
+    
     // get the element quadrature
     const auto& quad_e = *(m_quadrature->at(elem_ind));
     // get the quadrature points
@@ -313,7 +325,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
           D_tripletList.emplace_back(Eigen::Triplet<double>(glob_ind[i], glob_ind[j], mat_D(loc_ind[i], loc_ind[j])));
 
     }
-
+    
     
     // compute the local residual contributions
     //res_loc = mat_M * U_dot_loc + mat_S * U_loc + mat_K * U_loc;
@@ -321,19 +333,21 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
       for (int j = 0; j < mat_M.dimension(1); ++j)
       {
         if (m_do_afc)
-          res_loc(i) += mat_Ml(i,j) * U_dot_loc(j) + (mat_S(i,j)+mat_K(i,j)+mat_D(i,j))*U_loc(j) + res_loc_bdry[i];
+          res_loc(i) += mat_Ml(i,j) * U_dot_loc(j) + (mat_S(i,j)+mat_K(i,j)+mat_D(i,j))*U_loc(j);
         else
-          res_loc(i) += mat_M(i,j) * U_dot_loc(j) + (mat_S(i,j)+mat_K(i,j))*U_loc(j) + res_loc_bdry[i];
+          res_loc(i) += mat_M(i,j) * U_dot_loc(j) + (mat_S(i,j)+mat_K(i,j))*U_loc(j);
       }
     
-
+    // for (int i = 0; i < mat_M.dimension(0); ++i)
+    //   res_loc(i) += res_loc_bdry[i];
+    res_loc.setZero();
     //std::cout << "In Assembler_Bioseparation::buildResidualAndJacobian()" << std::endl;
 
     // compute the local jacobian contributions
-    if (m_do_afc)
-      mat_J = beta * mat_Ml + mat_S + mat_K;
-    else
-      mat_J = beta * mat_M + mat_S + mat_K;
+    // if (m_do_afc)
+    //   mat_J = beta * mat_Ml + mat_S + mat_K;
+    // else
+    //   mat_J = beta * mat_M + mat_S + mat_K;
 
     // Jacobian triples set up
     for (int i = 0; i < m_dofmapper->local_ndof(); ++i)
@@ -395,39 +409,55 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     (*res_U) += (*m_afc_vec);
   }
 
+  // std::cout << "U = \n" << *U << std::endl;
+  // std::cout << "U_dot = \n" << *U_dot << std::endl;
+  // std::cout << "residual = \n" << *res_U << std::endl;
+  // std::cin.get();
   
 }
 
-void Assembler_Bioseparation::
-applyDirichletBC(const std::shared_ptr<FEVector>& /*res_U*/,
-                 const std::shared_ptr<FEMatrix>& /*jac_U*/) const
+void   
+Assembler_Bioseparation::
+buildSteadyResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
+                               const std::shared_ptr<const FEVector>& U_dot,
+                               const std::shared_ptr<FEVector>& res_U,
+                               const std::shared_ptr<FEMatrix>& jac_U,
+                               const double /*time*/,
+                               const double /*delta_t*/,
+                               const double beta) const
 {
-  // const auto bc_ = std::dynamic_pointer_cast<BC_Scalar>(m_problem->getBoundaryCondition());
-  // const auto bc_fnc = m_problem->getBoundaryFunction();
-  // assert(bc_fnc);
-  // if (bc_)
-  // {
-  //   for (auto it = bc_->startBCPoints(); it != bc_->endBCPoints(); ++it)
-  //   {
-  //     if (bc_->isDirichlet(it))
-  //     { 
-  //       // get point index 
-  //       const auto i = it->first;
-  //       // Dirichlet boundary value 
-  //       (*res_U)[i] = (*bc_fnc)(m_mesh->getPoint(i));
-  //       // zero out the boundary row
-  //       jac_U->row(i) *= 0.0;
-  //       // set diagonal entry in compressed matrix to 1
-  //       jac_U->coeffRef(i,i) = 1.0;
-  //     }
-  //   }
-  // }
-  // // compress the matrix if modified
-  // jac_U->makeCompressed();
 
-//  std::cout << "residual \n" << *res_U << std::endl;
-//  std::cout << "jacobian \n" << *jac_U << std::endl;
 
+
+}
+
+
+void Assembler_Bioseparation::
+applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
+                 const std::shared_ptr<FEMatrix>& jac_U) const
+{
+  const auto bc_ = std::dynamic_pointer_cast<BC_Scalar>(m_problem->getBoundaryCondition());
+  const auto bc_fnc = m_problem->getBoundaryFunction();
+  assert(bc_fnc);
+  if (bc_)
+  {
+    for (auto it = bc_->startBCPoints(); it != bc_->endBCPoints(); ++it)
+    {
+      if (bc_->isDirichlet(it))
+      { 
+        // get point index 
+        const auto i = it->first;
+        // Dirichlet boundary value 
+        (*res_U)[i] = 0.0;//(*bc_fnc)(m_mesh->getPoint(i));
+        // zero out the boundary row
+        jac_U->row(i) *= 0.0;
+        // set diagonal entry in compressed matrix to 1
+        jac_U->coeffRef(i,i) = 1.0;
+      }
+    }
+  }
+  // compress the matrix if modified
+  jac_U->makeCompressed();
 }
 
 }

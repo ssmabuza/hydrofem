@@ -29,6 +29,7 @@ evaluate()
   for (Eigen::Index i = 0; i < m_result->size(); ++i)
     (*m_result)[i] = m_ic->evaluate(mesh->getPoint(i));
   m_is_computed = true;
+
 }
 
 ConsistentMassProjection::
