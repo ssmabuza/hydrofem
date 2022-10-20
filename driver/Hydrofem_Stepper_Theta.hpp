@@ -50,6 +50,8 @@ public:
     m_u_dot_old = lob->createVector(); m_u_dot_old->setZero();
     // build Jacobian matrix
     m_jac = lob->createSparseMatrix();
+    // initialize the matrix
+    lob->buildSparseGraph(m_jac);
     // build the nonlinear solver
     m_nlsolver = std::make_shared<NewtonSolver>(option_handler,m_assembler);
     // initialize nonlinear solver

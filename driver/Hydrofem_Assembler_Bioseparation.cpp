@@ -32,18 +32,12 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
   res_U->setZero();
   jac_U->setZero();
 
-  Problem_Bioseparation::Ptr problem = std::dynamic_pointer_cast<Problem_Bioseparation>(m_problem); assert(problem);
-  BC_Bioseparation::Ptr bc = std::dynamic_pointer_cast<BC_Bioseparation>(problem->getBoundaryCondition()); assert(bc);
-
-  // FEVector F_graph(m_mesh->numOfEdges()); F_graph.setZero();
-  // FEVector D_graph(m_mesh->numOfEdges()); D_graph.setZero();
-  // FEVector M_graph(m_mesh->numOfEdges()); M_graph.setZero();
+  const Problem_Bioseparation::Ptr problem = std::dynamic_pointer_cast<Problem_Bioseparation>(m_problem); assert(problem);
+  const BC_Bioseparation::Ptr bc = std::dynamic_pointer_cast<BC_Bioseparation>(problem->getBoundaryCondition()); assert(bc);
 
   // physical problem data from input file or input script
   //@{
-  //const auto vel = bc->getFluidVelocity();
-  const auto bc_fnc = problem->getBoundaryFunction();
-
+  const auto bc_fnc   = problem->getBoundaryFunction();
   const double pi     = M_PI;
   const double omega  = problem->omega();
   const double rho_s  = problem->rho_s();
@@ -56,28 +50,22 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
   const double d0     = problem->d0();
 
   // diffusive flow speed
-  double uavg = fr/((pi*width/2)*(pi*width/2));
+  const double uavg   = fr/((pi*width/2)*(pi*width/2));
 
   // diffusion tensor
-  double d11, d12, d21, d22;
-  d11=omega*d0+alphaT*uavg;
-  d12=0.0;
-  d21=0.0;
-  d22=omega*d0+alphaL*uavg;
+  const double d11 = omega*d0 + alphaT*uavg;
+  const double d12 = 0.0;
+  const double d21 = 0.0;
+  const double d22 = omega*d0 + alphaL*uavg;
   //@}
 
   // fluid velocity profile
-  std::function<SPoint(SPoint)> vel = [=](SPoint x)->SPoint
+  const std::function<SPoint(SPoint)> vel = [=](SPoint x)->SPoint
   { return SPoint(0.0,-3*fr*(x.x() - width)*x.x()/(4*pi*std::pow(width/2.0,3))); };
 
   // compute the limiter first
-  if (m_do_afc)
-    m_limiter->buildLimiter(m_nodal_limiter,U);
+  if (m_do_afc) m_limiter->buildLimiter(m_nodal_limiter,U);
 
-  // triplet list for Jacobian build
-  // TODO: prebuild Jac sparse graph and do sums
-  std::vector<Eigen::Triplet<double>> jac_tripletList;
-  jac_tripletList.reserve(m_dofmapper->nelements() * m_dofmapper->local_ndof() * m_dofmapper->local_ndof());
   std::vector<Eigen::Triplet<double>> D_tripletList;
   std::vector<Eigen::Triplet<double>> M_tripletList;
   if (m_do_afc)
@@ -97,7 +85,6 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     const auto& element = m_mesh->getElement(elem_ind);
     // element vertices
     const auto elem_verts = m_mesh->getElementVertices(elem_ind);
-    
     // local solution vector
     auto U_loc = createKArray<LVEC_<double>>(m_dofmapper->local_ndof());
     // local solution time derivative vector
@@ -115,6 +102,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     auto mat_M  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
     // local lumped mass matrix
     LMAT_<double> mat_Ml;// = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
+    // local artificial diffusion matrix
     LMAT_<double> mat_D;
     if (m_do_afc)
     {
@@ -125,18 +113,8 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     auto mat_S  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
     // local conv matrix
     auto mat_K  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
-    // local artificial diffusion matrix
-    //auto mat_D  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
     // local jacobian
     auto mat_J  = createKArray<LMAT_<double>>(m_dofmapper->local_ndof(),m_dofmapper->local_ndof());
-    
-    double area = m_mesh->getElementArea(elem_ind);
-    mat_J(0,0) = 1.0/area;
-    mat_J(1,1) = 1.0/area;
-    mat_J(2,2) = 1.0/area;
-
-
-    
     // get the element quadrature
     const auto& quad_e = *(m_quadrature->at(elem_ind));
     // get the quadrature points
@@ -326,9 +304,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
 
     }
     
-    
     // compute the local residual contributions
-    //res_loc = mat_M * U_dot_loc + mat_S * U_loc + mat_K * U_loc;
     for (int i = 0; i < mat_M.dimension(0); ++i)
       for (int j = 0; j < mat_M.dimension(1); ++j)
       {
@@ -338,28 +314,27 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
           res_loc(i) += mat_M(i,j) * U_dot_loc(j) + (mat_S(i,j)+mat_K(i,j))*U_loc(j);
       }
     
-    // for (int i = 0; i < mat_M.dimension(0); ++i)
-    //   res_loc(i) += res_loc_bdry[i];
-    res_loc.setZero();
-    //std::cout << "In Assembler_Bioseparation::buildResidualAndJacobian()" << std::endl;
+    for (int i = 0; i < mat_M.dimension(0); ++i)
+      res_loc(i) += res_loc_bdry[i];
 
     // compute the local jacobian contributions
-    // if (m_do_afc)
-    //   mat_J = beta * mat_Ml + mat_S + mat_K;
-    // else
-    //   mat_J = beta * mat_M + mat_S + mat_K;
+    if (m_do_afc)
+      mat_J = beta * mat_Ml + mat_S + mat_K;
+    else
+      mat_J = beta * mat_M + mat_S + mat_K;
 
     // Jacobian triples set up
     for (int i = 0; i < m_dofmapper->local_ndof(); ++i)
     {
       (*res_U)[glob_ind[i]] = res_loc[loc_ind[i]];
       for (int j = 0; j < m_dofmapper->local_ndof(); ++j)
-        jac_tripletList.emplace_back(Eigen::Triplet<double>(glob_ind[i], glob_ind[j], mat_J(loc_ind[i], loc_ind[j])));
+        jac_U->coeffRef(glob_ind[i], glob_ind[j]) += mat_J(loc_ind[i], loc_ind[j]);
+        //jac_tripletList.emplace_back(Eigen::Triplet<double>(glob_ind[i], glob_ind[j], mat_J(loc_ind[i], loc_ind[j])));
     }
 
   }
   // assemble Jacobian
-  jac_U->setFromTriplets(jac_tripletList.begin(), jac_tripletList.end());
+  //jac_U->setFromTriplets(jac_tripletList.begin(), jac_tripletList.end());
   if (m_do_afc && !m_built_d_mat_graph)
     m_D_mat->setFromTriplets(D_tripletList.begin(), D_tripletList.end());
   if (m_do_afc)
@@ -397,7 +372,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     }
 
     // close the sparse matrix
-    jac_U->makeCompressed();
+    //jac_U->makeCompressed();
 
     // check if the AFC contribution is conservative
     if (m_afc_vec->sum() > point_eps)
