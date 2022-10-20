@@ -326,7 +326,7 @@ buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
     // Jacobian triples set up
     for (int i = 0; i < m_dofmapper->local_ndof(); ++i)
     {
-      (*res_U)[glob_ind[i]] = res_loc[loc_ind[i]];
+      (*res_U)[glob_ind[i]] += res_loc[loc_ind[i]];
       for (int j = 0; j < m_dofmapper->local_ndof(); ++j)
         jac_U->coeffRef(glob_ind[i], glob_ind[j]) += mat_J(loc_ind[i], loc_ind[j]);
         //jac_tripletList.emplace_back(Eigen::Triplet<double>(glob_ind[i], glob_ind[j], mat_J(loc_ind[i], loc_ind[j])));
@@ -433,6 +433,10 @@ applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
   }
   // compress the matrix if modified
   jac_U->makeCompressed();
+
+  // print out the matrix
+//  std::cout << *res_U << std::endl;
+
 }
 
 }
