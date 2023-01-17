@@ -23,9 +23,11 @@ set(HYDRFEM_TPLS "./tpls")
 
 set(EIGEN "${HYDRFEM_TPLS}/eigen/")
 
+set(CLI11_INCLUDE_DIR "${HYDRFEM_TPLS}/CLI11/include")
+
 include_directories(${MAIN}
                     ${EIGEN} ${FE} ${MESH} ${UTILS} ${PHYSICS}
-                    ${LIN_ALG} ${DRIVER} ${DRIVER_AFC_STAB})
+                    ${LIN_ALG} ${DRIVER} ${DRIVER_AFC_STAB} ${CLI11_INCLUDE_DIR})
 
 file(GLOB SOURCES "${FE}*.cpp"
                   "${FE}*.hpp"

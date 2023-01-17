@@ -6,6 +6,7 @@
 // ****************************************************************************
 // @HEADER
 
+#include "CLI/CLI.hpp"
 #include "Hydrofem_DriverFactory.hpp"
 
 using namespace hydrofem;
@@ -16,6 +17,8 @@ int main(int argc, char** argv)
   // program options handler object
   try {
     
+    CLI::App app{"Hydrofem"};
+
     std::string configfilename;
 
     // Declare a group of options that will be

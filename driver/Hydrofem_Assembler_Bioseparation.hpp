@@ -56,14 +56,6 @@ public:
                                 const double delta_t,
                                 const double beta) const override;
 
-  void buildSteadyResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
-                                      const std::shared_ptr<const FEVector>& U_dot,
-                                      const std::shared_ptr<FEVector>& res_U,
-                                      const std::shared_ptr<FEMatrix>& jac_U,
-                                      const double time,
-                                      const double delta_t,
-                                      const double beta) const override;
-
   /** \brief  */
   void applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
                         const std::shared_ptr<FEMatrix>& jac_U) const override;

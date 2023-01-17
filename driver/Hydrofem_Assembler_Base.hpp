@@ -31,7 +31,7 @@ public:
    * \brief The transient assembly explicit and implicit stepping including explicit RK steppers
    *
    * \param U       - current solution
-   * \param U_dot   - current time derivative of solution (finite difference approx)
+   * \param U_dot   - current time derivative of solution 
    * \param res_U   - residual
    * \param jac_U   - Jacobian
    * \param time    - current time
@@ -48,7 +48,7 @@ public:
                                 const double /*beta*/) const { }
 
   /**
-   * \brief The transient assembly explicit and implicit stepping including explicit RK steppers
+   * \brief The steady part of the residual in
    *
    * \param U       - current solution
    * \param U_dot   - current time derivative of solution (finite difference approx)
