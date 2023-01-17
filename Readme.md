@@ -2,7 +2,7 @@
 # Introduction
 
 The "Hydrofem" project is a flexible serial finite element solver based on scalar nodal continuous finite elements. The code is designed to be a learning
-tool and uses third party libraries `Eigen` and `CLI`.
+tool and uses third party libraries `Eigen` and `CLI`. 
 
 # Third Party Libraries (TPLs)
 
