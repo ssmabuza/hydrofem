@@ -11,6 +11,47 @@
 namespace hydrofem
 {
 
+// void Mesh2D_Tri::setEdges()
+// {
+//   auto& edges_ = this->edges();
+//   const auto& elems_ = this->elems();
+
+//   std::unordered_map<std::pair<int, int>, std::shared_ptr<Edge>, boost::hash<std::pair<int, int>>> edge_map;
+
+//   // loop over all triangles
+//   for (const auto& tri : elems_)
+//   {
+//     // loop over all edges of the triangle
+//     for (int i = 0; i < 3; ++i)
+//     {
+//       int j = (i + 1) % 3;
+//       int v0 = tri->vertex(i);
+//       int v1 = tri->vertex(j);
+
+//       // check if edge (v0,v1) already exists
+//       std::pair<int, int> edge_indices(std::min(v0, v1), std::max(v0, v1));
+//       auto it = edge_map.find(edge_indices);
+
+//       if (it != edge_map.end()) // edge already exists
+//       {
+//         // add triangle to existing edge
+//         it->second->addTriangle(tri);
+//       }
+//       else // edge does not exist yet
+//       {
+//         // create new edge and add triangle to it
+//         auto edge = std::make_shared<Edge>(v0, v1);
+//         edge->addTriangle(tri);
+//         edges_.push_back(edge);
+
+//         // add edge to edge_map
+//         edge_map[edge_indices] = edge;
+//       }
+//     }
+//   }
+// }
+
+
 Mesh2D_Tri::Mesh2D_Tri(const std::string mesh_filename): Mesh2D()
 {
   num_dims() = 2;

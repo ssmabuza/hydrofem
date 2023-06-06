@@ -82,6 +82,20 @@ inline double evalDistance(const SPoint& point1, const SPoint& point2)
   return (point1-point2).norm();
 }
 
+inline double tetrahedronVolume(const SPoint& p0, const SPoint& p1, const SPoint& p2, const SPoint& p3)
+{
+  using vectype = Eigen::Vector3d;    
+  // calculate the volume of the tetrahedron using the formula:
+  // V = (1/6) * |(p1 - p0) . ((p2 - p0) x (p3 - p0))|
+  const vectype vec1 = (p1 - p0).data();
+  const vectype vec2 = (p2 - p0).data();
+  const vectype vec3 = (p3 - p0).data();
+  const auto cross_prod = vec2.cross(vec3);
+  const double dot_prod = vec1.dot(cross_prod);
+  const double volume = std::fabs(dot_prod) / 6.0;
+  return volume;
+}
+
 }
 // end namespace hydrofem
 

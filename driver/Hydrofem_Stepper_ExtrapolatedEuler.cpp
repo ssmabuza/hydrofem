@@ -45,7 +45,7 @@ void Stepper_ExtrapolatedEuler::solveStep()
   m_nlsolver->set_beta(2.0/m_delta_t);
   // fixed point iteration
   // force fixed-point iteration to do at least one solve for implicit stepping
-  while (!(m_nlsolver->reachedEnd()))
+  while (!(m_nlsolver->completed()))
   {
     // solve the problem
     m_nlsolver->solveStep(m_u_half,m_u_dot,m_u_half);

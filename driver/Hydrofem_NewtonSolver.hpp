@@ -63,14 +63,16 @@ public:
   inline void set_time(double time) { m_time = time; }
   inline void set_beta(double beta) { m_beta = beta; }
 
-  bool reachedEnd() const
+  inline bool completed() const { return reachedEnd(); } 
+
+private:
+
+  inline bool reachedEnd() const
   { 
     m_converged = (m_res <= m_tol);
     return ((m_num_its >= m_its) || m_converged); 
   }
 
-private:
-  
   mutable int m_num_its = 0;
   mutable double m_res;
 

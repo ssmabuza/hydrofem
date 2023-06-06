@@ -13,7 +13,7 @@ set(MAIN    "./main/"                 )
 set(FE      "./disc_fe/"              )
 set(MESH    "./mesh/"                 )
 set(UTILS   "./utils/"                )
-set(LIN_ALG "./linear_solvers/"       )
+set(LIN_ALG "./linear/"       )
 
 set(DRIVER          "./driver/"         )
 set(DRIVER_AFC_STAB "./driver/afc_stab/")

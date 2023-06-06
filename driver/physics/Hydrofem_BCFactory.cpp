@@ -11,6 +11,7 @@
 
 #include "Hydrofem_Mesh.hpp"
 
+#include "Hydrofem_BC_CDR.hpp"
 #include "Hydrofem_BC_Scalar.hpp"
 #include "Hydrofem_BC_Bioseparation.hpp"
 
@@ -26,6 +27,8 @@ std::shared_ptr<BC> BCFactory::build()
     bc = std::make_shared<BC_Scalar>(m_mesh);
   } else if (m_bc_name == "bc-bioseparation") {
     bc = std::make_shared<BC_Bioseparation>(m_mesh);
+  } else if (m_bc_name == "bc-cdr") {
+    bc = std::make_shared<BC_CDR>(m_mesh);
   } else {
     throw std::logic_error("Error in BCFactory::buildBC(), no valid BC chosen.");
   }

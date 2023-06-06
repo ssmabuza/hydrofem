@@ -46,11 +46,14 @@ private:
   {
     // nothing to parse yet
     config.add_options()
-      ("stepper-name",po::value<std::string>(&m_name)->default_value("theta"),"Stepper name");
+      ("stepper-name",po::value<std::string>(&m_name)->default_value("theta"),"Stepper name")
+      ("stepper-type",po::value<std::string>(&m_type)->default_value("classic"),"Stepper type");
   }
 
   // name of stepper 
   std::string m_name;
+  // type of stepper (classic or not classic/modern)
+  std::string m_type;
   //
   std::shared_ptr<InitialSolution> m_ic;
   // parameters and options

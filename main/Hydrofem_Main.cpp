@@ -9,7 +9,7 @@
 #include "CLI/CLI.hpp"
 #include "Hydrofem_DriverFactory.hpp"
 
-using namespace hydrofem;
+using namespace Hydrofem;
 
 int main(int argc, char** argv)
 {
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     generic.add_options()
       ("version,v", "print version string")
       ("help", "produce help message")
-      ("config,c", po::value<std::string>(&configfilename)->default_value("default.config"), "Configuration or run script");
+      ("config", po::value<std::string>(&configfilename)->default_value("default.config"), "Configuration or run script");
   
     // Declare a group of options that will be 
     // allowed both on command line and in

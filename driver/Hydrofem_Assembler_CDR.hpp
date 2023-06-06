@@ -6,8 +6,8 @@
 // ****************************************************************************
 // @HEADER
 
-#ifndef __Hydrofem_Assembler_Bioseparation_HPP__
-#define __Hydrofem_Assembler_Bioseparation_HPP__
+#ifndef __Hydrofem_Assembler_CDR_HPP__
+#define __Hydrofem_Assembler_CDR_HPP__
 
 
 #include "Hydrofem_FEBasis.hpp"
@@ -20,7 +20,7 @@
 namespace hydrofem
 {
 
-class Assembler_Bioseparation
+class Assembler_CDR
   :
   public Assembler_Base
 {
@@ -29,10 +29,10 @@ public:
   using LOB = Assembler_Base::LOB;
 
   /** \brief Ctor */
-  Assembler_Bioseparation(const std::shared_ptr<Problem>& problem,
-                          const std::shared_ptr<DofMapper>& dofmapper,
-                          const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
-                          const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature, bool afc_enabled)
+  Assembler_CDR(const std::shared_ptr<Problem>& problem,
+                const std::shared_ptr<DofMapper>& dofmapper,
+                const std::shared_ptr<std::vector<std::shared_ptr<FEBasis>>>& basis,
+                const std::shared_ptr<std::vector<std::shared_ptr<Quadrature>>>& quadrature, bool /*afc_enabled*/)
   {
     m_problem = problem;
     m_dofmapper = dofmapper;
@@ -42,11 +42,11 @@ public:
     m_problem = problem;
     m_lob = std::make_shared<LOB>(m_dofmapper);
     m_afc_vec = m_lob->createVector();
-    m_do_afc = afc_enabled;
+    //m_do_afc = afc_enabled;
   }
   
   /** \brief Dtor */
-  ~Assembler_Bioseparation() override = default;
+  ~Assembler_CDR() override = default;
   
   void buildResidualAndJacobian(const std::shared_ptr<const FEVector>& U,
                                 const std::shared_ptr<const FEVector>& U_dot,
@@ -79,7 +79,7 @@ protected:
   // AFC vector
   std::shared_ptr<FEVector> m_afc_vec;
   // do algebraic flux correction
-  bool m_do_afc;
+  //bool m_do_afc;
   // AFC edge graphs
   // global mass matrix
   std::shared_ptr<FEMatrix> m_M_mat;
@@ -93,4 +93,4 @@ protected:
 }
 // end namespace hydrofem
 
-#endif /** __Hydrofem_Assembler_Bioseparation_HPP__ */
+#endif /** __Hydrofem_Assembler_CDR_HPP__ */

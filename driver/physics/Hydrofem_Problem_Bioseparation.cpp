@@ -14,7 +14,9 @@
 
 namespace hydrofem
 {
-  
+
+namespace {
+
 static
 double boundaryFunction(const double /*x*/, const double y)
 {
@@ -24,7 +26,9 @@ double boundaryFunction(const double /*x*/, const double y)
   return val;
 }
 
-std::function<double(SPoint)> initcondFunction = [](SPoint p)->double 
+/*constexpr const
+std::function<double(SPoint)>*/
+auto initcondFunction = [](SPoint p)->decltype(auto)
 {
   return boundaryFunction(p.x(),p.y());
 };
@@ -54,6 +58,8 @@ public:
   { return boundaryFunction(x.x(),x.y()); }
 
 };
+
+}
 
 void Problem_Bioseparation::init()
 {

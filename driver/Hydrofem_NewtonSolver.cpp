@@ -25,7 +25,7 @@ solve(const std::shared_ptr<FEVector>& U_result,
 
   solveStep(m_u_new,U_guess);
   int m = 0;
-  if (reachedEnd())
+  if (completed())
   {
     // assign the solution
     *U_result = *m_u_new;
@@ -35,7 +35,7 @@ solve(const std::shared_ptr<FEVector>& U_result,
     return;
   }
   
-  while (!(reachedEnd()))
+  while (!(completed()))
   {
     m++;
     *m_u_old = *m_u_new;
@@ -58,8 +58,10 @@ solveStep(const std::shared_ptr<FEVector>& U_result,
   // check if residual norm is not usual
   if (std::isnan(m_res) || std::isinf(m_res))
   {
+    std::string behavior = std::isnan(m_res)? "NAN" : "INF"; 
     std::stringstream ss;
-    ss << "Error in NewtonSolver::solveInitialStep!!! residual norm is " << m_res << ", aborting!!";
+    ss << "Error in NewtonSolver::solveInitialStep!!! residual norm is " 
+          + behavior + " which is equal to " << m_res << ", aborting!!";
     throw std::runtime_error(ss.str());
   }
   *m_residual *= -1.0;
@@ -148,6 +150,8 @@ void NewtonSolver::finalize() const
     if (m_inexact)
     {
       std::cout << " iterations. Accepting solution!!" << std::endl;
+      std::cout << "Fixed point iteration number of iterations = " << m_num_its << std::endl;
+      std::cout << "Fixed point iteration residual norm        = " << m_res << std::endl;
     } else {
       std::cout << " iterations. Aborting!!" << std::endl;
       std::cout << std::endl;

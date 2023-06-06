@@ -20,7 +20,7 @@ void FunctionElement<ScalarT>::
 set_coefficients(const FunctionElement::CoeffType& c_e)
 {
   assert(int(c_e.size()) == m_ndof);
-  for (std::size_t i = 0; i < c_e.size(); ++i)
+  for (Eigen::Index i = 0; i < c_e.size(); ++i)
     m_c_e(i) = c_e(i);
 }
 
@@ -43,7 +43,7 @@ ScalarT FunctionElement<ScalarT>::
 operator()(const SPoint& P, const std::vector<SPoint>& element) const
 {
   ScalarT res = 0.0;
-  for (std::size_t i = 0; i < m_c_e.size(); ++i)
+  for (Eigen::Index i = 0; i < m_c_e.size(); ++i)
     res += m_c_e[i]*(*(m_basis->at(i)))(P,element);
   return res;
 }
@@ -53,7 +53,7 @@ ScalarT FunctionElement<ScalarT>::
 operator()(const SPoint& P, const std::vector<SPoint>& element, const FunctionElement<ScalarT>::CoeffTypeConst& c_e) const
 {
   ScalarT res = 0.0;
-  for (std::size_t i = 0; i < m_c_e.size(); ++i)
+  for (Eigen::Index i = 0; i < m_c_e.size(); ++i)
     res += c_e[i]*(*(m_basis->at(i)))(P,element);
   return res;
 }
@@ -63,12 +63,12 @@ typename FunctionElement<ScalarT>::CoeffType
 FunctionElement<ScalarT>::grad(const SPoint& P, const std::vector<SPoint>& element) const
 {
   CoeffType res = createKArray<CoeffType>(P.size());
-  for (std::size_t dim = 0; dim < res.dimension(0); ++dim)
+  for (Eigen::Index dim = 0; dim < res.dimension(0); ++dim)
     res(dim) = 0.0;
-  for (std::size_t i = 0; i < m_c_e.size(); ++i)
+  for (Eigen::Index i = 0; i < m_c_e.size(); ++i)
   {
     auto grad_loc = (*(m_basis->at(i))).grad(P,element);
-    for (std::size_t dim = 0; dim < res.size(); ++dim)
+    for (Eigen::Index dim = 0; dim < res.size(); ++dim)
       res(dim) += m_c_e[i]*grad_loc(dim);
   }
   return res;

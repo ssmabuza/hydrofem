@@ -107,6 +107,7 @@ private:
     
   virtual void updateNodes_AM_FMT(const std::string filename_am_fmt) override;
   
+//  virtual void setEdges();
 };
 
 }

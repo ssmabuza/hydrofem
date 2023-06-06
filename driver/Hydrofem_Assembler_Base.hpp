@@ -122,6 +122,10 @@ public:
   /** \brief */                                
   virtual std::shared_ptr<LOB> lob() { return m_lob; }
 
+  /** \brief Get the matrix from dR/dU_dot. This method is required by some classic steppers and some explicit steppers. */
+  std::shared_ptr<FEMatrix> getTimeDerivativeMatrix() const 
+  { return nullptr; }
+
 protected:
   
   // user built LOB

@@ -6,12 +6,12 @@
 // ****************************************************************************
 // @HEADER
 
-#include "Hydrofem_Stepper_Theta.hpp"
+#include "Hydrofem_Stepper_Classic_Theta.hpp"
 
 namespace hydrofem
 {
 
-void Stepper_Theta::solveStep()
+void Stepper_Classic_Theta::solveStep()
 {
   // update the time
   m_time += m_delta_t;
