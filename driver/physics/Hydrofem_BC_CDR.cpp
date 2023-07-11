@@ -14,7 +14,7 @@ namespace hydrofem
 void BC_CDR::initialize()
 {
   assert(m_mesh);
-  assert(m_velocity);
+  assert(&m_velocity);
   
   for (int elem_ind(0); elem_ind < m_mesh->numOfElements(); ++elem_ind)
   {

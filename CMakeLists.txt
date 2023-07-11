@@ -1,11 +1,11 @@
-project(hydrofem)
-
 cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_CXX_STANDARD 17)
+project(hydrofem)
+
+set(CMAKE_CXX_STANDARD 23)
 set(LINKER_LANGUAGE CXX)
 
-set(CMAKE_CXX_FLAGS "-fopenmp -O3 -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-fopenmp -O3 -Wall -Wextra -Wshadow")
 set(HOME    "~/"                      )
 
 set(MAIN    "./main/"                 )
