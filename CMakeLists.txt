@@ -2,6 +2,19 @@ cmake_minimum_required(VERSION 3.10)
 
 project(hydrofem)
 
+include(CTest)
+include(FetchContent)
+FetchContent_Declare(googletest
+					 GIT_REPOSITORY git@github.com:google/googletest.git
+					 GIT_TAG v1.14.0)
+
+FetchContent_GetProperties(googletest)
+
+if (NOT googletest_POPULATED)
+	FetchContent_Populate(googletest)
+	add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BUILD_DIR})
+endif()
+
 set(CMAKE_CXX_STANDARD 23)
 set(LINKER_LANGUAGE CXX)
 
@@ -39,16 +52,18 @@ file(GLOB SOURCES "${FE}*.cpp"
                   "${DRIVER_AFC_STAB}*.hpp"
                   "${LIN_ALG}*.cpp"
                   "${LIN_ALG}*.hpp"
-                  "${MAIN}*.cpp"
-                  "${MAIN}*.hpp"
                   "${MESH}*.cpp"
                   "${MESH}*.hpp"
                   "${UTILS}*.cpp"
                   "${UTILS}*.hpp")
 
-add_executable(hydrofem ${SOURCES})
-if (WIN32)
-  
-else()
-  target_link_libraries(hydrofem PRIVATE boost_program_options)
-endif(WIN32)
+# create a library from the code
+add_library(libhydrofem STATIC ${SOURCES})
+
+
+add_executable(hydrofem ${SOURCES} ${MAIN}/main.cpp)
+target_link_libraries(hydrofem PRIVATE boost_program_options)
+
+# unit test using gtest
+add_executable(unit_tests ./tests/utests.cpp)
+target_link_libraries(unit_tests libhydrofem gtest_main gmock_main)
