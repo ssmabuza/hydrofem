@@ -6,8 +6,8 @@
 // ****************************************************************************
 // @HEADER
 
-#ifndef __Hydrofem_LinearSolvers_Tpetra_HPP__
-#define __Hydrofem_LinearSolvers_Tpetra_HPP__
+#ifndef __Hydrofem_EigenLinearSolvers_HPP__
+#define __Hydrofem_EigenLinearSolvers_HPP__
 
 #include "Hydrofem.hpp"
 #include "Hydrofem_EigenFEVecMat.hpp"

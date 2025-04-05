@@ -22,6 +22,7 @@ set(CMAKE_CXX_FLAGS "-fopenmp -O3 -Wall -Wextra -Wshadow")
 set(HOME    "~/"                      )
 
 set(MAIN    "./main/"                 )
+set(UTESTS    "./tests/"                 )
 
 set(FE      "./disc_fe/"              )
 set(MESH    "./mesh/"                 )
@@ -60,10 +61,10 @@ file(GLOB SOURCES "${FE}*.cpp"
 # create a library from the code
 add_library(libhydrofem STATIC ${SOURCES})
 
-
-add_executable(hydrofem ${SOURCES} ${MAIN}/main.cpp)
+# create the main executable for the code
+add_executable(hydrofem ${SOURCES} ${MAIN}/Hydrofem_Main.cpp)
 target_link_libraries(hydrofem PRIVATE boost_program_options)
 
 # unit test using gtest
-add_executable(unit_tests ./tests/utests.cpp)
+add_executable(unit_tests ${UTESTS}/utests.cpp)
 target_link_libraries(unit_tests libhydrofem gtest_main gmock_main)
