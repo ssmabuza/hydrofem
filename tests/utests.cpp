@@ -1,6 +1,7 @@
 
 #include "disc_fe_utests.hpp"
-
+#include "linear_utests.hpp"
+#include "mesh_utests.hpp"
 
 
 int main(int argc, char** argv) {
