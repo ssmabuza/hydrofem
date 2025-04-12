@@ -1,15 +1,17 @@
 
 # Introduction
 
-The "Hydrofem" project is a flexible serial finite element solver based on scalar nodal continuous finite elements. The code is designed to be a learning
-tool and uses third party libraries `Eigen` and `CLI`. 
+The "Hydrofem" project is a flexible partly serial and partly parallel finite element solver based on scalar nodal continuous finite elements. The code is designed to be a learning
+tool and uses third party libraries: `Boost`, `Eigen`, `CLI`, `PETSc` and `deal.ii`. 
 
 # Third Party Libraries (TPLs)
 
-`Eigen` is already included in this repo. To get `CLI`, run either one of the following command inside the `tpls` directory:
+Install `Boost` via the linux package managers or compile it from source. In Ubuntu/Debian, write `sudo apt-get install libboost-all-dev`. `Eigen` is already included in this repo. To get `CLI`, run either one of the following command inside the `tpls` directory:
 
  - `git clone git@github.com:CLIUtils/CLI11.git`
  - `git clone https://github.com/CLIUtils/CLI11.git`
+
+`deal.ii` and `PETSc` are installed together using the [spack](https://spack.io/) framework.
 
 # Build Instructions
 
