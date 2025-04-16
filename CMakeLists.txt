@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(hydrofem)
 
 include(CTest)
+
 include(FetchContent)
 FetchContent_Declare(googletest
 					 GIT_REPOSITORY git@github.com:google/googletest.git
@@ -68,3 +69,14 @@ target_link_libraries(hydrofem PRIVATE boost_program_options)
 # unit test using gtest
 add_executable(unit_tests ${UTESTS}/utests.cpp)
 target_link_libraries(unit_tests libhydrofem gtest_main gmock_main)
+
+
+add_executable(hydrofem_default_test ${UTESTS}/Hydrofem_CTest_Default.cpp)
+target_link_libraries(hydrofem_default_test PRIVATE libhydrofem)
+
+enable_testing()
+
+# add the test to ctest
+add_test(NAME default_test
+         COMMAND hydrofem_default_test
+         )
