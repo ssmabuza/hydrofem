@@ -1,5 +1,6 @@
 
-#include "disc_fe_utests.hpp"
+#include "Hydrofem_Linear_gtests.hpp"
+#include "Hydrofem_Disc_FE_gtests.hpp"
 
 
 
