@@ -55,13 +55,13 @@ file(GLOB SOURCES "${FE}*.cpp"
                   "${UTILS}*.hpp")
 
 # create a library from the code
-add_library(libhydrofem STATIC ${SOURCES})
+add_library(hydrofem STATIC ${SOURCES})
 
 # create the main executable for the code
-add_executable(hydrofem ${SOURCES} ${MAIN}/Hydrofem_Main.cpp)
-target_link_libraries(hydrofem PRIVATE boost_program_options)
+add_executable(hydrofem.exe ${SOURCES} ${MAIN}/Hydrofem_Main.cpp)
+target_link_libraries(hydrofem.exe PRIVATE boost_program_options)
 
 # unit test using gtest
 add_executable(unit_tests ${UTESTS}/Hydrofem_gtests.cpp)
-target_link_libraries(unit_tests libhydrofem gtest_main gmock_main)
+target_link_libraries(unit_tests hydrofem gtest_main gmock_main)
 

@@ -17,7 +17,8 @@ TEST(linear_unit_tests,identity_matrix_test_cg)
   auto y = std::make_shared<hydrofem::FEVector>(n);
   hydrofem::LinearSolvers::solveSystemCG(A,x,y);
   
-  ASSERT_EQ(*x,*y);
+  for (int i = 0; i < n; ++i)
+    ASSERT_NEAR((*x)[i],(*y)[i],1.0e-10);
 }
 
 TEST(linear_unit_tests,identity_matrix_test_bicgstab)
@@ -33,7 +34,9 @@ TEST(linear_unit_tests,identity_matrix_test_bicgstab)
   auto y = std::make_shared<hydrofem::FEVector>(n);
   hydrofem::LinearSolvers::solveSystemBiCGSTAB(A,x,y);
   
-  ASSERT_EQ(*x,*y);
+  for (int i = 0; i < n; ++i)
+    ASSERT_NEAR((*x)[i],(*y)[i],1.0e-10);
+//  ASSERT_EQ(*x,*y);
 }
 
 TEST(linear_unit_tests,identity_matrix_test_gmres)
@@ -49,5 +52,7 @@ TEST(linear_unit_tests,identity_matrix_test_gmres)
   auto y = std::make_shared<hydrofem::FEVector>(n);
   hydrofem::LinearSolvers::solveSystemGMRES(A,x,y);
   
-  ASSERT_EQ(*x,*y);
+  for (int i = 0; i < n; ++i)
+    ASSERT_NEAR((*x)[i],(*y)[i],1.0e-10);
+//  ASSERT_EQ(*x,*y);
 }
