@@ -1,0 +1,36 @@
+name: CMake Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up CMake
+      uses: jwlawson/actions-setup-cmake@v1
+      with:
+        cmake-version: '4.0.0' # You can specify the version you need
+
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y build-essential cmake && sudo apt-get install libboost-all-dev
+
+   - name: Run CMake
+      run: cmake --preset debug
+
+    - name: Build
+      run: cmake --build --preset debug
+
+    - name: Run tests
+      run: |
+        cd build/debug
+        ./unit_tests
+
