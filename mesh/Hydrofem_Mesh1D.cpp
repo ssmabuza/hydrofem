@@ -27,7 +27,6 @@ Mesh1D::Mesh1D(const Mesh1D::mesh_info_type& mesh_info)
   m_mesh_type = MeshType::typeLineMesh;
 }
 
-
 Mesh1D::Mesh1D(const int nx, const double L_l, const double L_r)
 {
   num_dims() = 1;
@@ -45,11 +44,11 @@ void Mesh1D::generateUniformMesh(const int nx, const double L_l, const double L_
   auto& _points = points();
   auto& _elems = elems();
   
-  _points.clear();
+  _points.reserve(nx+1);
   const double delta_x = (L_r-L_l)/nx;
   for (int node_ind = 0; node_ind < nx+1; ++node_ind)
-    _points.push_back(SPoint(L_l+delta_x*node_ind));
-  
+    _points.emplace_back(L_l+delta_x*node_ind);
+    
   _elems.clear();
   _elems.resize(nx);
   for (auto elem_ind = 0; elem_ind < nx; ++elem_ind)
@@ -132,8 +131,8 @@ SPoint Mesh1D::evalEdgeNormal(const int elem_ind, const int /*local_edge_ind*/) 
 
 double Mesh1D::evalElementArea(const int elem_ind)
 {
-  const auto& pointInd = getEdgeGlobalIndexes(elem_ind);
-  return evalDistance(getPoint(pointInd.at(0)),getPoint(pointInd.at(1)));
+  const auto& pointInd = getElementVertices(elem_ind);
+  return evalDistance(pointInd.at(0),pointInd.at(1));
 }
 
 void Mesh1D::setAreaEachElement()

@@ -1,7 +1,7 @@
 
 #pragma once 
-#include <gtest/gtest.h>
 
+#include <gtest/gtest.h>
 #include "Hydrofem_LinearSolvers.hpp"
 
 TEST(linear_unit_tests,identity_matrix_test_cg)
@@ -36,7 +36,6 @@ TEST(linear_unit_tests,identity_matrix_test_bicgstab)
   
   for (int i = 0; i < n; ++i)
     ASSERT_NEAR((*x)[i],(*y)[i],1.0e-10);
-//  ASSERT_EQ(*x,*y);
 }
 
 TEST(linear_unit_tests,identity_matrix_test_gmres)
@@ -54,5 +53,4 @@ TEST(linear_unit_tests,identity_matrix_test_gmres)
   
   for (int i = 0; i < n; ++i)
     ASSERT_NEAR((*x)[i],(*y)[i],1.0e-10);
-//  ASSERT_EQ(*x,*y);
 }

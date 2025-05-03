@@ -64,8 +64,6 @@ public:
   
 protected:
   
-  MeshType m_mesh_type = MeshType::typeLineMesh;
-  
   //! \brief function sets the stencil for all the nodes in the mesh
   void setStencil();                                                  
   
