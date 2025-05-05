@@ -18,7 +18,7 @@ jobs:
     - name: Set up CMake
       uses: jwlawson/actions-setup-cmake@v1
       with:
-        cmake-version: '4.0.0' # You can specify the version you need
+        cmake-version: '3.22.0' # You can specify the version you need
 
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y build-essential cmake && sudo apt-get install libboost-all-dev
