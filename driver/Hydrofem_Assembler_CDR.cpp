@@ -391,7 +391,7 @@ applyDirichletBC(const std::shared_ptr<FEVector>& res_U,
       if (bc_->isDirichlet(it))
       { 
         // get point index 
-        const auto i = it->first;
+        const auto i = getIndexFromBC(it);
         // Dirichlet boundary value 
         (*res_U)[i] = (*bc_fnc)(m_mesh->getPoint(i));
         // zero out the boundary row

@@ -6,6 +6,7 @@ include(FetchContent)
 FetchContent_Declare(googletest GIT_REPOSITORY git@github.com:google/googletest.git GIT_TAG v1.14.0)
 FetchContent_MakeAvailable(googletest)
 
+set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_STANDARD 23)
 set(LINKER_LANGUAGE CXX)
 
@@ -23,6 +24,7 @@ set(DRIVER "./driver/")
 set(DRIVER_AFC_STAB "${DRIVER}afc_stab/")
 set(DRIVER_PHYSICS "${DRIVER}physics/")
 
+# TPLs for the project
 set(HYDRFEM_TPLS "./tpls")
 set(EIGEN "${HYDRFEM_TPLS}/eigen/")
 

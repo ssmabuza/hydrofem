@@ -29,7 +29,8 @@ void GlobalMassMatrix(const std::shared_ptr<FEMatrix>& mass_mat,
     for (int i = 0; i < dofmapper->local_ndof(); ++i)
       for (int j = 0; j < dofmapper->local_ndof(); ++j)
       {
-        tripletList.emplace_back(Eigen::Triplet<double>(glob_ind[i], glob_ind[j], local_mass_matrix(loc_ind[i], loc_ind[j])));
+//        tripletList.emplace_back(Eigen::Triplet<double>(glob_ind[i], glob_ind[j], local_mass_matrix(loc_ind[i], loc_ind[j])));
+        tripletList.emplace_back(glob_ind[i], glob_ind[j], local_mass_matrix(loc_ind[i], loc_ind[j]));
       }
   }
   mass_mat->setFromTriplets(tripletList.begin(), tripletList.end());

@@ -44,7 +44,7 @@ void GlobalConvectionMatrices(const std::vector<std::shared_ptr<FEMatrix>>& conv
       {
         for (int j = 0; j < dofmapper->local_ndof(); ++j)
         {
-          tripletList.emplace_back(Eigen::Triplet<double>(glob_ind[i], glob_ind[j], local_conv_matrix(loc_ind[i], loc_ind[j])));
+          tripletList.emplace_back(glob_ind[i], glob_ind[j], local_conv_matrix(loc_ind[i], loc_ind[j]));
         }
       }
     }

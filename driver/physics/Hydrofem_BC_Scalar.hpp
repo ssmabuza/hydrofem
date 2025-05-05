@@ -165,6 +165,11 @@ protected:
   
 };
 
+
+//! TODO: generalize this to all BC types
+inline 
+int getIndexFromBC(BC_Scalar::BCConstIt bc_info) { return bc_info->first; }
+
 }
 // end namespace hydrofem
 
