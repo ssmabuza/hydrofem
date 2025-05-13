@@ -1,6 +1,6 @@
 // @HEADER
 // ****************************************************************************
-//                Hydrofem: Copyright (2016) S. Mabuza
+//                Hydrofem: Copyright S. Mabuza
 //
 // Distributed under BSD 3-clause license (See accompanying file Copyright.txt)
 // ****************************************************************************

@@ -7,7 +7,7 @@ FetchContent_Declare(googletest GIT_REPOSITORY https://github.com/google/googlet
 FetchContent_MakeAvailable(googletest)
 
 set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(LINKER_LANGUAGE CXX)
 
 set(CMAKE_CXX_FLAGS "-fopenmp -O3 -Wall -Wextra -Wshadow")
