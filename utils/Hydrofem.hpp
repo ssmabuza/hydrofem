@@ -39,6 +39,8 @@
 #include <unordered_map>
 #include <boost/program_options.hpp>
 
+#include <mfem.hpp>
+
 // project namespace 
 namespace hydrofem {}
 // namespace alias to avoid typo error
