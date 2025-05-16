@@ -10,7 +10,7 @@ set(CMAKE_CXX_COMPILER /usr/bin/mpicxx)
 set(CMAKE_CXX_STANDARD 20)
 set(LINKER_LANGUAGE CXX)
 
-if (HYDROFEM_USE_MFEM=="ON")
+if (${HYDROFEM_USE_MFEM} STREQUAL "ON")
     if (NOT MFEM_DIR)
         message(FATAL_ERROR "MFEM_DIR is not set. Please set it to the path of your MFEM installation.")
     endif()

@@ -39,7 +39,9 @@
 #include <unordered_map>
 #include <boost/program_options.hpp>
 
+#ifdef HYDROFEM_USE_MFEM
 #include <mfem.hpp>
+#endif 
 
 // project namespace 
 namespace hydrofem {}

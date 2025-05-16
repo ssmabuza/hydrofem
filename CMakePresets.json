@@ -11,7 +11,10 @@
         "name": "default",
         "hidden": true,
         "generator": "Unix Makefiles",
-        "binaryDir": "${sourceDir}/build/${presetName}"
+        "binaryDir": "${sourceDir}/build/${presetName}",
+        "cacheVariables": {
+          "HYDROFEM_USE_MFEM": "ON"
+        }
       },
       {
         "name": "debug",
