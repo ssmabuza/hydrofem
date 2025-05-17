@@ -10,9 +10,13 @@ set(CMAKE_CXX_COMPILER /usr/bin/mpicxx)
 set(CMAKE_CXX_STANDARD 20)
 set(LINKER_LANGUAGE CXX)
 
-if (${HYDROFEM_USE_MFEM} STREQUAL "ON")
+#if (${HYDROFEM_USE_MFEM} STREQUAL "ON")
+
+if (HYDROFEM_USE_MFEM)
     if (NOT MFEM_DIR)
-        message(FATAL_ERROR "MFEM_DIR is not set. Please set it to the path of your MFEM installation.")
+        message(FATAL_ERROR "MFEM_DIR is not set. Please set it to the path of your MFEM installation.") 
+    else()
+        message(STATUS "MFEM Found, now building parallel hydrofem")
     endif()
     find_package(MFEM REQUIRED)
     if (NOT MFEM_FOUND)
@@ -64,6 +68,10 @@ if (NOT MFEM_FOUND)
     target_link_libraries(hydrofem.exe PRIVATE boost_program_options)
 else()
     target_link_libraries(hydrofem.exe PRIVATE boost_program_options ${MFEM_LIBRARIES} ${MFEM_EXTRA_LIBRARIES} mpi_cxx mpi)
+endif()
+
+if (MFEM_FOUND)
+    target_compile_definitions(hydrofem.exe PRIVATE HYDROFEM_USE_MFEM=${HYDROFEM_USE_MFEM})
 endif()
 
 # unit test using gtest
